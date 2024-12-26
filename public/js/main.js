@@ -1,4 +1,4 @@
-const apiUrl = "http://localhost:5000/api"; // Replace with your API URL if deployed
+const apiUrl = "https://topper.onrender.com/api"; // Replace with your API URL if deployed
 
 // Fetch Portfolio Items
 async function fetchPortfolio() {
