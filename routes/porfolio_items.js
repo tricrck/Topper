@@ -1,0 +1,76 @@
+const items = [
+    {
+      "title": "E-Commerce Web App",
+      "role": "Full-stack Developer",
+      "description": "Developed a scalable e-commerce platform to handle high traffic, including a responsive design and secure payment gateway.",
+      "technologies": ["React", "Node.js", "MongoDB", "Express", "AWS"],
+      "link": "https://example-ecommerce.com",
+      "image": "https://example.com/images/ecommerce.jpg",
+      "skills": ["Web Development", "API Integration", "Responsive Design", "Database Management", "Cloud Deployment"]
+    },
+    {
+      "title": "AI Chatbot",
+      "role": "Back-end Developer",
+      "description": "Designed and implemented a chatbot using natural language processing to assist users in real-time queries.",
+      "technologies": ["Python", "Django", "TensorFlow", "SQLite"],
+      "link": "https://example-chatbot.com",
+      "image": "https://example.com/images/chatbot.jpg",
+      "skills": ["Machine Learning", "NLP", "API Design", "Server Management", "Data Analysis"]
+    },
+    {
+      "title": "Mobile Banking App",
+      "role": "Mobile Developer",
+      "description": "Built a secure and user-friendly mobile app for online banking with real-time transaction notifications.",
+      "technologies": ["Flutter", "Firebase", "Dart"],
+      "link": "https://example-bankingapp.com",
+      "image": "https://example.com/images/bankingapp.jpg",
+      "skills": ["Mobile Development", "UX Design", "Security Protocols", "Real-time Data", "Cross-Platform Support"]
+    },
+    {
+      "title": "Portfolio Website",
+      "role": "Front-end Developer",
+      "description": "Created a personal portfolio website to showcase projects and skills with interactive animations.",
+      "technologies": ["HTML", "CSS", "JavaScript", "GSAP"],
+      "link": "https://example-portfolio.com",
+      "image": "https://example.com/images/portfolio.jpg",
+      "skills": ["UI Design", "CSS Animations", "SEO", "Responsive Design", "Performance Optimization"]
+    },
+    {
+      "title": "Inventory Management System",
+      "role": "Software Engineer",
+      "description": "Developed a web-based system to streamline inventory tracking and reporting for businesses.",
+      "technologies": ["Angular", "Java", "MySQL"],
+      "link": "https://example-inventory.com",
+      "image": "https://example.com/images/inventory.jpg",
+      "skills": ["Database Design", "Full-stack Development", "Reporting Tools", "System Optimization", "Version Control"]
+    },
+    {
+      "title": "Real-time Collaboration Tool",
+      "role": "Full-stack Engineer",
+      "description": "Built a web app enabling teams to collaborate in real-time with chat, video, and document sharing features.",
+      "technologies": ["Vue.js", "Node.js", "WebRTC", "Redis"],
+      "link": "https://example-collaborationtool.com",
+      "image": "https://example.com/images/collaboration.jpg",
+      "skills": ["WebSockets", "Real-time Features", "Team Collaboration", "Scalable Architecture", "Performance Tuning"]
+    },
+    {
+      "title": "Weather Forecasting App",
+      "role": "Frontend Developer",
+      "description": "Designed a weather forecasting app with real-time updates and location-based services.",
+      "technologies": ["React Native", "OpenWeatherMap API"],
+      "link": "https://example-weatherapp.com",
+      "image": "https://example.com/images/weatherapp.jpg",
+      "skills": ["API Integration", "Mobile Optimization", "Geolocation Services", "UI/UX Design", "Data Visualization"]
+    },
+    {
+      "title": "Health Monitoring Dashboard",
+      "role": "Software Developer",
+      "description": "Developed a dashboard to monitor and analyze health data using wearable device integrations.",
+      "technologies": ["React", "Python", "Pandas", "GraphQL"],
+      "link": "https://example-healthdashboard.com",
+      "image": "https://example.com/images/healthdashboard.jpg",
+      "skills": ["Data Analytics", "Dashboard Development", "API Integration", "Data Visualization", "Wearable Tech"]
+    }
+  ];
+module.exports = items;
+  

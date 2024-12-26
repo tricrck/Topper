@@ -1,5 +1,6 @@
 const express = require("express");
 const Portfolio = require("../models/Portfolio");
+const items = require("./porfolio_items");
 
 const router = express.Router();
 
@@ -14,11 +15,13 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get all portfolio items
+// Get all portfolio items (from database and JSON file)
 router.get("/", async (req, res) => {
   try {
-    const portfolios = await Portfolio.find();
-    res.json(portfolios);
+    // const dbPortfolios = await Portfolio.find();
+    // ...dbPortfolios,
+    const allPortfolios = [...items]; // Fetch from JSON file
+    res.json(allPortfolios);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

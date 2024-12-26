@@ -1,5 +1,6 @@
 const express = require("express");
 const Testimonial = require("../models/Testimonial");
+const testimonials = require("./testimonials.json");
 
 const router = express.Router();
 
@@ -17,7 +18,7 @@ router.post("/", async (req, res) => {
 // Get all testimonials
 router.get("/", async (req, res) => {
   try {
-    const testimonials = await Testimonial.find();
+    // const testimonials = await Testimonial.find();
     res.json(testimonials);
   } catch (err) {
     res.status(500).json({ message: err.message });

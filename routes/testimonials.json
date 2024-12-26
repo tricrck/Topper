@@ -1,0 +1,33 @@
+[
+    {
+      "name": "Jane Doe",
+      "testimonial": "Working with this team was an absolute pleasure. Their professionalism and attention to detail exceeded my expectations.",
+      "designation": "Project Manager, Tech Solutions Inc.",
+      "link": "https://www.techsolutions.com/testimonials"
+    },
+    {
+      "name": "John Smith",
+      "testimonial": "The project was delivered on time and exceeded all our quality benchmarks. I highly recommend their services.",
+      "designation": "CEO, Innovate Corp",
+      "link": "https://www.innovatecorp.com"
+    },
+    {
+      "name": "Emily Johnson",
+      "testimonial": "Their expertise and dedication are unmatched. They turned our vision into reality seamlessly.",
+      "designation": "Creative Director, Visionary Agency",
+      "link": "https://www.visionaryagency.com/testimonials"
+    },
+    {
+      "name": "Michael Brown",
+      "testimonial": "Outstanding work! Their team consistently delivers exceptional results, even under tight deadlines.",
+      "designation": "CTO, NextGen Solutions",
+      "link": "https://www.nextgensolutions.com"
+    },
+    {
+      "name": "Sarah Lee",
+      "testimonial": "I couldn't be happier with the results. Their innovative approach brought new life to our business processes.",
+      "designation": "Operations Manager, Bright Future Co.",
+      "link": "https://www.brightfutureco.com"
+    }
+  ]
+  

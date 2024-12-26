@@ -1,0 +1,53 @@
+[
+    {
+      "title": "Getting Started with Node.js",
+      "content": "Node.js is a JavaScript runtime built on Chrome's V8 engine. In this post, we will explore the basics of Node.js and how to set up your first server.",
+      "author": "John Doe",
+      "tags": ["Node.js", "Backend", "JavaScript"],
+      "image": "images/nodejs.png",
+      "createdAt": "2024-12-01T10:00:00Z",
+      "updatedAt": "2024-12-01T10:00:00Z",
+      "isPublished": true
+    },
+    {
+      "title": "Mastering React Components",
+      "content": "React components are the building blocks of any React application. Learn about functional and class components, and how to use props and state effectively.",
+      "author": "Jane Smith",
+      "tags": ["React", "Frontend", "JavaScript"],
+      "image": "images/masterreact.png",
+      "createdAt": "2024-12-05T12:00:00Z",
+      "updatedAt": "2024-12-05T12:00:00Z",
+      "isPublished": true
+    },
+    {
+      "title": "Introduction to MongoDB",
+      "content": "MongoDB is a NoSQL database that stores data in a flexible, JSON-like format. In this blog, we will discuss how to set up MongoDB and use it in your applications.",
+      "author": "Emily Johnson",
+      "tags": ["MongoDB", "Database", "Backend"],
+      "image": "images/MongoDB.jpg",
+      "createdAt": "2024-12-08T14:00:00Z",
+      "updatedAt": "2024-12-08T14:00:00Z",
+      "isPublished": true
+    },
+    {
+      "title": "Understanding RESTful APIs",
+      "content": "RESTful APIs are a powerful way to allow applications to communicate over HTTP. In this post, we will cover the fundamentals of designing and using REST APIs.",
+      "author": "Michael Brown",
+      "tags": ["API", "REST", "Web Development"],
+      "image": "images/restful.png",
+      "createdAt": "2024-12-10T16:00:00Z",
+      "updatedAt": "2024-12-10T16:00:00Z",
+      "isPublished": true
+    },
+    {
+      "title": "Deploying Your Web Application to AWS",
+      "content": "In this tutorial, we'll guide you through the process of deploying a simple web application to Amazon Web Services (AWS), including setting up EC2 instances and S3 buckets.",
+      "author": "Sarah Lee",
+      "tags": ["AWS", "Cloud", "Deployment"],
+      "image": "images/deploy.png",
+      "createdAt": "2024-12-12T18:00:00Z",
+      "updatedAt": "2024-12-12T18:00:00Z",
+      "isPublished": true
+    }
+  ]
+  
