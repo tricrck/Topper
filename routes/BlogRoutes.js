@@ -1,7 +1,7 @@
 const express = require("express");
 const Blog = require("../models/Blog"); // Adjust path to the Blog model
 const router = express.Router();
-const blogs = require("./blogs.json");
+// const blogs = require("./blogs.json");
 
 // Add a new blog
 router.post("/", async (req, res) => {
@@ -17,7 +17,7 @@ router.post("/", async (req, res) => {
 // Get all blogs
 router.get("/", async (req, res) => {
   try {
-    // const blogs = await Blog.find();
+    const blogs = await Blog.find();
     res.json(blogs);
   } catch (err) {
     res.status(500).json({ message: err.message });

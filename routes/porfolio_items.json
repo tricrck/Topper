@@ -1,4 +1,4 @@
-const items = [
+[
     {
       "title": "E-Commerce Web App",
       "role": "Full-stack Developer",
@@ -71,6 +71,5 @@ const items = [
       "image": "https://example.com/images/healthdashboard.jpg",
       "skills": ["Data Analytics", "Dashboard Development", "API Integration", "Data Visualization", "Wearable Tech"]
     }
-  ];
-module.exports = items;
+  ]
   
