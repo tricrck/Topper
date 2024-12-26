@@ -353,11 +353,58 @@ footer {
   animation: pulse 1.5s infinite;
 }
 
+.full-blog {
+  grid-column: 1 / -1;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 2.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.full-blog h2 {
+  font-size: 2.5rem;
+  color: #1a1a1a;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.full-blog-image {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin: 1.5rem 0;
+}
+
+.full-blog p {
+  color: #444;
+  line-height: 1.8;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.full-blog p strong {
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.blog-content {
+  margin-top: 2rem;
+  font-family: 'Georgia', serif;
+}
+
+.blog-content p {
+  margin-bottom: 1.5rem;
+}
+
 @keyframes pulse {
   0% { opacity: 1; }
   50% { opacity: 0.7; }
   100% { opacity: 1; }
 }
+
 
 @media (max-width: 768px) {
   .profile-header {
@@ -367,6 +414,18 @@ footer {
 
   .profile-info {
       text-align: center;
+  }
+  .full-blog {
+    padding: 1.5rem;
+    margin: 0 1rem;
+  }
+
+  .full-blog h2 {
+      font-size: 1.8rem;
+  }
+
+  .full-blog-image {
+      height: 300px;
   }
 }
   
