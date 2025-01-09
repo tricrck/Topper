@@ -1,8 +1,26 @@
-const apiUrl = "https://topper.onrender.com/api"; // Replace with your API URL if deployed
+const apiUrl = "https://topper.onrender.com/api"; // Replace with http://localhost:5000/api or https://topper.onrender.com/api
+
+/* Loader start */
+// Create a wrapper for the loader
+const loaderContainer = document.createElement("div");
+loaderContainer.className = "loader-container";
+
+// Create and configure the cardio loader
+const loader = document.createElement("l-cardio");
+loader.setAttribute("size", "80");
+loader.setAttribute("stroke", "4");
+loader.setAttribute("speed", "2");
+loader.setAttribute("color", "black");
+
+loaderContainer.appendChild(loader);
+
+/* Loader End */
 
 // Fetch Portfolio Items
 async function fetchPortfolio() {
   const portfolioContainer = document.getElementById("portfolio-container");
+
+  portfolioContainer.appendChild(loaderContainer);
 
   try {
     const response = await fetch(`${apiUrl}/portfolio`);
@@ -11,6 +29,8 @@ async function fetchPortfolio() {
     }
 
     const portfolioItems = await response.json();
+
+    loaderContainer.remove();
 
     portfolioItems.forEach((item) => {
       const portfolioCard = `
@@ -28,6 +48,7 @@ async function fetchPortfolio() {
     });
   } catch (error) {
     console.error("Error fetching portfolio items:", error);
+    loaderContainer.remove();
     portfolioContainer.innerHTML = `<p class="error-message">Failed to load portfolio items. Please try again later.</p>`;
   }
 }
@@ -58,6 +79,8 @@ async function fetchTestimonials() {
 async function fetchBlogs() {
   const blogContainer = document.getElementById("blog-container");
 
+  blogContainer.appendChild(loaderContainer);
+
   try {
     const response = await fetch(`${apiUrl}/blogs`);
     if (!response.ok) {
@@ -65,6 +88,9 @@ async function fetchBlogs() {
     }
 
     const blogItems = await response.json();
+
+    // Remove the loader
+    loaderContainer.remove();
 
     blogItems.forEach((item) => {
       const blogCard = `
@@ -87,6 +113,7 @@ async function fetchBlogs() {
 
   } catch (error) {
     console.error("Error fetching blog items:", error);
+    loaderContainer.remove();
     blogContainer.innerHTML = `<p class="error-message">Failed to load blogs. Please try again later.</p>`;
   }
 }
@@ -95,6 +122,8 @@ async function fetchBlogs() {
 async function fetchSingleBlog(id) {
   const blogContainer = document.getElementById("blog-container");
 
+  blogContainer.appendChild(loaderContainer);
+
   try {
     const response = await fetch(`${apiUrl}/blogs/${id}`);
     if (!response.ok) {
@@ -102,6 +131,7 @@ async function fetchSingleBlog(id) {
     }
 
     const blog = await response.json();
+    loaderContainer.remove();
 
     // Replace the blog container content with the full blog content
     blogContainer.innerHTML = `
@@ -117,6 +147,7 @@ async function fetchSingleBlog(id) {
     `;
   } catch (error) {
     console.error("Error fetching single blog:", error);
+    loaderContainer.remove();
     blogContainer.innerHTML = `<p class="error-message">Failed to load the blog. Please try again later.</p>`;
   }
 }

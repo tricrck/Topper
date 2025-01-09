@@ -16,6 +16,7 @@ body {
   line-height: 1.6;
   color: var(--text-color);
   background-color: var(--background-light);
+  height: 100%;
 }
 .main{
   height: 70vh;
@@ -288,6 +289,14 @@ footer {
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  min-height: 90vh;
+}
+
+.loader-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .blog-card {
