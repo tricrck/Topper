@@ -12,16 +12,18 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static("public"));
+app.use(express.static("frontend/build"));
 
 // Routes
 const portfolioRoutes = require("./routes/portfolioRoutes");
 const testimonialRoutes = require("./routes/testimonialRoutes");
 const blogsRoutes = require("./routes/BlogRoutes");
+const UserRoutes = require("./routes/UserRoutes");
 
 app.use("/api/portfolio", portfolioRoutes);
 app.use("/api/testimonials", testimonialRoutes);
 app.use("/api/blogs", blogsRoutes);
+app.use("/api/users", UserRoutes);
 
 // MongoDB connection
 const PORT = process.env.PORT || 5000;

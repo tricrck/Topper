@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Manager</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .form-container {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .portfolio-item {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .btn {
+      padding: 5px 10px;
+      margin: 5px 0;
+      cursor: pointer;
+    }
+    .btn.delete {
+      color: white;
+      background-color: red;
+      border: none;
+    }
+    .btn.update {
+      color: white;
+      background-color: blue;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Portfolio Manager</h1>
+
+  <div class="form-container">
+    <h2>Add / Update Portfolio Item</h2>
+    <form id="portfolio-form">
+      <input type="hidden" id="portfolio-id" />
+      <div>
+        <label>Title:</label>
+        <input type="text" id="title" required />
+      </div>
+      <div>
+        <label>Role:</label>
+        <input type="text" id="role" />
+      </div>
+      <div>
+        <label>Description:</label>
+        <textarea id="description"></textarea>
+      </div>
+      <div>
+        <label>Technologies (comma-separated):</label>
+        <input type="text" id="technologies" />
+      </div>
+      <div>
+        <label>Skills (comma-separated, max 5):</label>
+        <input type="text" id="skills" />
+      </div>
+      <div>
+        <label>Link:</label>
+        <input type="url" id="link" />
+      </div>
+      <div>
+        <label>Image URL:</label>
+        <input type="url" id="image" />
+      </div>
+      <button type="submit" class="btn">Save</button>
+    </form>
+  </div>
+
+  <div>
+    <h2>Search Portfolio</h2>
+    <input type="text" id="search-query" placeholder="Search by title or technologies" />
+    <button id="search-btn" class="btn">Search</button>
+  </div>
+
+  <h2>Portfolio Items</h2>
+  <div id="portfolio-list"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
