@@ -3,7 +3,7 @@ const User = require("../models/User");
 const router = express.Router();
 
 // Routes
-router.post("/api/signup", async (req, res) => {
+router.post("/", async (req, res) => {
   const { uid, email, displayName, photoURL } = req.body;
 
   try {
