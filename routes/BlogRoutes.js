@@ -75,7 +75,8 @@ router.delete("/:id", async (req, res) => {
 });
 
 // Comment routes
-// Create comment
+
+// Create a comment
 router.post("/:blogId/comments", async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.blogId);
@@ -86,12 +87,20 @@ router.post("/:blogId/comments", async (req, res) => {
     const comment = new Comment({
       blog: req.params.blogId,
       content: req.body.content,
-      author: req.body.author
+      author: req.body.author,
+      parentComment: req.body.parentComment || null,
     });
 
     const savedComment = await comment.save();
     blog.comments.push(savedComment._id);
     await blog.save();
+
+    // If the comment has a parent, add this comment to the parent's replies
+    if (req.body.parentComment) {
+      await Comment.findByIdAndUpdate(req.body.parentComment, {
+        $push: { replies: savedComment._id }
+      });
+    }
 
     res.status(201).json(savedComment);
   } catch (err) {
@@ -99,15 +108,21 @@ router.post("/:blogId/comments", async (req, res) => {
   }
 });
 
-// Get all comments for a blog
+// Get all comments for a blog with nested replies
 router.get("/:blogId/comments", async (req, res) => {
   try {
-    const comments = await Comment.find({ blog: req.params.blogId });
+    const comments = await Comment.find({ blog: req.params.blogId })
+      .populate({
+        path: 'replies',
+        populate: { path: 'author' }
+      });
     res.json(comments);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
+
+
 
 // Update comment
 router.put("/:blogId/comments/:commentId", async (req, res) => {
@@ -128,6 +143,7 @@ router.put("/:blogId/comments/:commentId", async (req, res) => {
   }
 });
 
+
 // Delete comment
 router.delete("/:blogId/comments/:commentId", async (req, res) => {
   try {
@@ -140,6 +156,13 @@ router.delete("/:blogId/comments/:commentId", async (req, res) => {
       return res.status(404).json({ message: "Comment not found" });
     }
 
+    // If the comment has a parent, remove this comment from the parent's replies
+    if (comment.parentComment) {
+      await Comment.findByIdAndUpdate(comment.parentComment, {
+        $pull: { replies: comment._id }
+      });
+    }
+
     // Remove comment reference from blog
     await Blog.findByIdAndUpdate(req.params.blogId, {
       $pull: { comments: req.params.commentId }
@@ -148,6 +171,50 @@ router.delete("/:blogId/comments/:commentId", async (req, res) => {
     res.json({ message: "Comment deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+});
+
+
+// Like a comment
+router.post("/:blogId/comments/:commentId/like", async (req, res) => {
+  try {
+    const comment = await Comment.findById(req.params.commentId);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    // Add user ID to the likes array if not already present
+    if (!comment.likes.includes(req.body.userId)) {
+      comment.likes.push(req.body.userId);
+      await comment.save();
+      return res.json({ message: "Comment liked", likes: comment.likes.length });
+    } else {
+      return res.status(400).json({ message: "You already liked this comment" });
+    }
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// Unlike a comment
+router.post("/:blogId/comments/:commentId/unlike", async (req, res) => {
+  try {
+    const comment = await Comment.findById(req.params.commentId);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    // Remove user ID from the likes array
+    const index = comment.likes.indexOf(req.body.userId);
+    if (index !== -1) {
+      comment.likes.splice(index, 1);
+      await comment.save();
+      return res.json({ message: "Comment unliked", likes: comment.likes.length });
+    } else {
+      return res.status(400).json({ message: "You haven't liked this comment yet" });
+    }
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 });
 
