@@ -1,21 +1,19 @@
 import React, { useState } from 'react';
 import { Navbar, Nav, Container, Badge, Dropdown, Modal } from 'react-bootstrap';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { logout } from '../actions/user_actions';
 import Profile from '../pages/Profile';
 
 const AdminHeader = () => {
   const [notifications] = useState([
-    { id: 1, text: 'New comment on blog post', time: '5m ago' },
-    { id: 2, text: 'New portfolio submission', time: '1h ago' },
-    { id: 3, text: 'New testimonial received', time: '2h ago' },
+    { id: 1, text: 'Build New Features Dipshit', time: '5m ago' },
   ]);
   const [showModal, setShowModal] = useState(false);
-  const { user } = useSelector((state) => state.auth);
+  // const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   const handleLogout = () => {
-      dispatch(logout()); // Adjust according to your logout action
+      dispatch(logout());
       setShowModal(false);
     };
 

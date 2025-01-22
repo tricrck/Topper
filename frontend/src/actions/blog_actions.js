@@ -35,8 +35,8 @@ import {
     COMMENT_UNLIKE_FAIL,
  } from '../constants/blog'
 
- const url = process.env.REACT_APP_API_URL;
- console.log(url)
+ const url = "https://topper.onrender.com/api";
+
  export const listBlogs = () => async (dispatch) => {
     try {
         dispatch({ type: BLOG_LIST_REQUEST })

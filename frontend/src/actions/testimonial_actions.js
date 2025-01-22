@@ -23,7 +23,6 @@ import {
         dispatch({ type: TESTIMONIAL_LIST_REQUEST })
 
         const { data } = await axios.get(`${url}/testimonials`)
-        console.log(data)
 
 
         dispatch({

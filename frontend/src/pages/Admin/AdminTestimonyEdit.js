@@ -34,7 +34,7 @@ const AdminTestimonyEdit = () => {
 
   useEffect(() => {
     if (successUpdate) {
-      navigate('/admin/testimonials');
+      navigate('/admin/testimonialist');
     } else {
       if (!testimonial._id || testimonial._id !== id) {
         dispatch(getTestimonialDetails(id));
@@ -111,10 +111,10 @@ const AdminTestimonyEdit = () => {
   const handleCancel = () => {
     if (isFormDirty) {
       if (window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
-        navigate('/admin/testimonials');
+        navigate('/admin/testimonialist');
       }
     } else {
-      navigate('/admin/testimonials');
+      navigate('/admin/testimonialist');
     }
   };
 

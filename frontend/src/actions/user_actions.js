@@ -15,7 +15,7 @@ import {
 import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "@firebase/auth";
 import { auth, googleProvider } from "../firebase";
 
-const API_URL = process.env.REACT_APP_API_URL
+const API_URL = "https://topper.onrender.com/api"
 
 // Google Signup
 export const googleSignup = () => async (dispatch) => {

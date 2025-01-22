@@ -95,7 +95,7 @@ const AdminTestimonyCreate = () => {
                 <h1 className="mb-0">Create Testimonial</h1>
                 <Button
                   variant="outline-secondary"
-                  onClick={() => navigate('/admin/testimonials')}
+                  onClick={() => navigate('/admin/testimonialist')}
                 >
                   Back to List
                 </Button>

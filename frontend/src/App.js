@@ -63,7 +63,7 @@ function App() {
           <Route path="/admin/portfolio/create" element={<AdminRoute element={<AdminPortfolioCreate />} />} />
 
           <Route path="/admin/testimonialist" element={<AdminRoute element={<AdminTestimonyList />} />} />
-          <Route path="/admin/testimonial/create" element={<AdminRoute element={<AdminTestimonyCreate />} />} />
+          <Route path="/admin/testimonials/create" element={<AdminRoute element={<AdminTestimonyCreate />} />} />
           <Route path="/admin/testimonial/edit/:id" element={<AdminRoute element={<AdminTestimonyEdit />} />} />
           <Route path="/admin" element={<AdminRoute element={<Dashboard />} />} />
 
