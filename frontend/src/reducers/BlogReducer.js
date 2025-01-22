@@ -26,6 +26,12 @@ import {
     COMMENT_DELETE_REQUEST,
     COMMENT_DELETE_SUCCESS,
     COMMENT_DELETE_FAIL,
+    COMMENT_LIKE_REQUEST,
+    COMMENT_LIKE_SUCCESS,
+    COMMENT_LIKE_FAIL,
+    COMMENT_UNLIKE_REQUEST,
+    COMMENT_UNLIKE_SUCCESS,
+    COMMENT_UNLIKE_FAIL,
  } from '../constants/blog'
 
 export const BlogReducer = (state = { blogs: [] }, action) => {
@@ -117,15 +123,43 @@ export const commentCreateReducer = (state = {}, action) => {
     }
 };
 
-// Comment List Reducer
+
+// Modified Comment List Reducer to handle nested comments
 export const commentListReducer = (state = { comments: [] }, action) => {
     switch (action.type) {
         case COMMENT_LIST_REQUEST:
             return { loading: true, comments: [] };
         case COMMENT_LIST_SUCCESS:
-            return { loading: false, comments: action.payload };
+            return { 
+                loading: false, 
+                comments: action.payload.map(comment => ({
+                    ...comment,
+                    replies: comment.replies || []
+                }))
+            };
         case COMMENT_LIST_FAIL:
             return { loading: false, error: action.payload };
+        case COMMENT_LIKE_SUCCESS:
+            return {
+                ...state,
+                comments: state.comments.map(comment =>
+                    comment._id === action.payload.commentId
+                        ? { ...comment, likes: [...comment.likes, action.payload.userId] }
+                        : comment
+                )
+            };
+        case COMMENT_UNLIKE_SUCCESS:
+            return {
+                ...state,
+                comments: state.comments.map(comment =>
+                    comment._id === action.payload.commentId
+                        ? { 
+                            ...comment, 
+                            likes: comment.likes.filter(id => id !== action.payload.userId)
+                        }
+                        : comment
+                )
+            };
         default:
             return state;
     }
@@ -139,6 +173,43 @@ export const commentUpdateReducer = (state = {}, action) => {
         case COMMENT_UPDATE_SUCCESS:
             return { loading: false, success: true, comment: action.payload };
         case COMMENT_UPDATE_FAIL:
+            return { loading: false, error: action.payload };
+        default:
+            return state;
+    }
+};
+
+export const commentLikeReducer = (state = {}, action) => {
+    switch (action.type) {
+        case COMMENT_LIKE_REQUEST:
+            return { loading: true };
+        case COMMENT_LIKE_SUCCESS:
+            return { 
+                loading: false, 
+                success: true,
+                commentId: action.payload.commentId,
+                likes: action.payload.likes
+            };
+        case COMMENT_LIKE_FAIL:
+            return { loading: false, error: action.payload };
+        default:
+            return state;
+    }
+};
+
+// Comment Unlike Reducer
+export const commentUnlikeReducer = (state = {}, action) => {
+    switch (action.type) {
+        case COMMENT_UNLIKE_REQUEST:
+            return { loading: true };
+        case COMMENT_UNLIKE_SUCCESS:
+            return { 
+                loading: false, 
+                success: true,
+                commentId: action.payload.commentId,
+                likes: action.payload.likes
+            };
+        case COMMENT_UNLIKE_FAIL:
             return { loading: false, error: action.payload };
         default:
             return state;

@@ -27,9 +27,16 @@ import {
     COMMENT_DELETE_REQUEST,
     COMMENT_DELETE_SUCCESS,
     COMMENT_DELETE_FAIL,
+    COMMENT_LIKE_REQUEST,
+    COMMENT_LIKE_SUCCESS,
+    COMMENT_LIKE_FAIL,
+    COMMENT_UNLIKE_REQUEST,
+    COMMENT_UNLIKE_SUCCESS,
+    COMMENT_UNLIKE_FAIL,
  } from '../constants/blog'
 
- const url = 'http://localhost:5000/api'
+ const url = process.env.REACT_APP_API_URL;
+ console.log(url)
  export const listBlogs = () => async (dispatch) => {
     try {
         dispatch({ type: BLOG_LIST_REQUEST })
@@ -134,11 +141,15 @@ export const deleteBlog = (id) => async (dispatch) => {
 };
 
 // Create Comment
+// Modified createComment action to handle replies
 export const createComment = (blogId, commentData) => async (dispatch) => {
     try {
         dispatch({ type: COMMENT_CREATE_REQUEST });
 
-        const { data } = await axios.post(`${url}/blogs/${blogId}/comments`, commentData);
+        const { data } = await axios.post(`${url}/blogs/${blogId}/comments`, {
+            ...commentData,
+            parentComment: commentData.parentId || null // Adding support for nested replies
+        });
 
         dispatch({
             type: COMMENT_CREATE_SUCCESS,
@@ -212,6 +223,61 @@ export const deleteComment = (blogId, commentId) => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: COMMENT_DELETE_FAIL,
+            payload: error.response && error.response.data.message
+                ? error.response.data.message
+                : error.message,
+        });
+    }
+};
+
+export const likeComment = (blogId, commentId, userId) => async (dispatch) => {
+    try {
+        dispatch({ type: COMMENT_LIKE_REQUEST });
+
+        const { data } = await axios.post(
+            `${url}/blogs/${blogId}/comments/${commentId}/like`,
+            { userId }
+        );
+
+        dispatch({
+            type: COMMENT_LIKE_SUCCESS,
+            payload: {
+                commentId,
+                likes: data.likes,
+                userId
+            },
+        });
+    } catch (error) {
+        dispatch({
+            type: COMMENT_LIKE_FAIL,
+            payload: error.response && error.response.data.message
+                ? error.response.data.message
+                : error.message,
+        });
+    }
+};
+
+// Unlike Comment
+export const unlikeComment = (blogId, commentId, userId) => async (dispatch) => {
+    try {
+        dispatch({ type: COMMENT_UNLIKE_REQUEST });
+
+        const { data } = await axios.post(
+            `${url}/blogs/${blogId}/comments/${commentId}/unlike`,
+            { userId }
+        );
+
+        dispatch({
+            type: COMMENT_UNLIKE_SUCCESS,
+            payload: {
+                commentId,
+                likes: data.likes,
+                userId
+            },
+        });
+    } catch (error) {
+        dispatch({
+            type: COMMENT_UNLIKE_FAIL,
             payload: error.response && error.response.data.message
                 ? error.response.data.message
                 : error.message,

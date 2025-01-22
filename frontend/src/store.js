@@ -19,7 +19,14 @@ import { BlogReducer, blogDetailsReducer, blogCreateReducer, blogDeleteReducer, 
     commentListReducer,
     commentUpdateReducer,
     commentDeleteReducer,
+    commentLikeReducer,
+    commentUnlikeReducer,
  } from './reducers/BlogReducer'
+
+ import {
+    authReducer,
+    usersReducer,
+  } from './reducers/UserReducer';
 
 
 const reducer = combineReducers({
@@ -48,15 +55,26 @@ const reducer = combineReducers({
     commentList: commentListReducer,
     commentUpdate: commentUpdateReducer,
     commentDelete: commentDeleteReducer,
+    commentLike: commentLikeReducer,
+    commentUnlike: commentUnlikeReducer,
+
+    // User Reducers
+    auth: authReducer,
+    users: usersReducer,
+
 
 })
 
 const TestimoniesFromStorage = localStorage.getItem('testimonialsList') ?
     JSON.parse(localStorage.getItem('testimonialsList')) : []
 
+const authFromStorage = localStorage.getItem('auth') ?
+    JSON.parse(localStorage.getItem('auth')) : []
+
 
 const initialState = {
     testimonialsList: TestimoniesFromStorage,
+    auth: authFromStorage,
 }
     
 

@@ -96,7 +96,6 @@ main{
 }
 
 .moon-themed-card {
-  background: rgb(233, 219, 219);
   color: #000000;
   border: 2px solid #555;
   box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
@@ -114,4 +113,11 @@ main{
 
 .moon-themed-card h3 {
   color: #ffcc00;
+}
+
+@media (max-width: 400px) {
+  .login-card {
+    width: 300px; /* Set a fixed width */
+    margin: 0 auto; /* Center the card horizontally */
+  }
 }

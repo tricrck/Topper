@@ -6,6 +6,7 @@ import { getBlogDetails } from '../actions/blog_actions';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 import CommentSection from './CommentSection';
+import BlogContent from './BlogContent';
 
 const BlogDetails = () => {
     const { id } = useParams();
@@ -60,7 +61,8 @@ const BlogDetails = () => {
                         variant="top" 
                         src={blog.image}
                         style={{ 
-                            height: '400px', 
+                            height: '50%',
+                            width: 'auto', 
                             objectFit: 'cover',
                             borderTopLeftRadius: '0.5rem',
                             borderTopRightRadius: '0.5rem'
@@ -69,80 +71,77 @@ const BlogDetails = () => {
                 )}
                 
                 <Card.Body className="p-4 p-md-5">
-                    {blog.tags && blog.tags.length > 0 && (
-                        <div className="mb-4">
-                            {blog.tags.map((tag, index) => (
-                                <Badge 
-                                    key={index}
-                                    bg="primary"
-                                    className="me-2 mb-2 px-3 py-2"
-                                >
-                                    {tag}
-                                </Badge>
-                            ))}
-                        </div>
-                    )}
+                {/* Tags */}
+                {blog.tags && blog.tags.length > 0 && (
+                    <div className="mb-4">
+                        {blog.tags.map((tag, index) => (
+                            <Badge 
+                                key={index}
+                                bg="primary"
+                                className="me-2 mb-2 px-3 py-2"
+                            >
+                                {tag}
+                            </Badge>
+                        ))}
+                    </div>
+                )}
 
-                    <Card.Title as="h1" className="mb-4">
-                        {blog.title || 'Untitled Blog'}
-                    </Card.Title>
+                {/* Title */}
+                <Card.Title as="h1" className="mb-4">
+                    {blog.title || 'Untitled Blog'}
+                </Card.Title>
 
-                    <Row className="mb-4 text-muted">
-                        <Col md={6}>
-                            <div className="d-flex align-items-center mb-3 mb-md-0">
-                                <i className="bi bi-person-circle fs-4 me-2"></i>
-                                <div>
-                                    <div>By {blog.author || 'Anonymous'}</div>
-                                    {blog.createdAt && (
-                                        <small>
-                                            Published on {formatDate(blog.createdAt)}
-                                        </small>
-                                    )}
-                                </div>
-                            </div>
-                        </Col>
-                        <Col md={6}>
-                            <div className="d-flex align-items-center justify-content-md-end">
-                                <i className="bi bi-clock me-2"></i>
-                                <small>{readTime} min read</small>
-                                
-                                {blog.updatedAt && (
-                                    <>
-                                        <div className="mx-3">|</div>
-                                        <i className="bi bi-calendar-check me-2"></i>
-                                        <small>
-                                            Last updated {formatDate(blog.updatedAt)}
-                                        </small>
-                                    </>
+                {/* Metadata */}
+                <Row className="mb-4 text-muted">
+                    <Col md={6}>
+                        <div className="d-flex align-items-center mb-3 mb-md-0">
+                            <i className="bi bi-person-circle fs-4 me-2"></i>
+                            <div>
+                                <div>By {blog.author || 'Anonymous'}</div>
+                                {blog.createdAt && (
+                                    <small>
+                                        Published on {formatDate(blog.createdAt)}
+                                    </small>
                                 )}
                             </div>
-                        </Col>
-                    </Row>
-
-                    <Card.Text className="blog-content">
-                        {blog.content ? 
-                            blog.content.split('\n').map((paragraph, index) => (
-                                <p key={index}>{paragraph}</p>
-                            ))
-                            : <p>No content available</p>
-                        }
-                    </Card.Text>
-
-                    <hr className="my-4" />
-
-                    <div className="d-flex justify-content-between align-items-left">
-                        <div className="d-flex gap-2">
-                            <Button variant="outline-primary">
-                                <i className="bi bi-share me-2"></i>
-                                Share
-                            </Button>
-                            <Button variant="primary">
-                                <i className="bi bi-bookmark me-2"></i>
-                                Save
-                            </Button>
                         </div>
+                    </Col>
+                    <Col md={6}>
+                        <div className="d-flex align-items-center justify-content-md-end">
+                            <i className="bi bi-clock me-2"></i>
+                            <small>{readTime} min read</small>
+
+                            {blog.updatedAt && (
+                                <>
+                                    <div className="mx-3">|</div>
+                                    <i className="bi bi-calendar-check me-2"></i>
+                                    <small>
+                                        Last updated {formatDate(blog.updatedAt)}
+                                    </small>
+                                </>
+                            )}
+                        </div>
+                    </Col>
+                </Row>
+
+                {/* Content */}
+                <BlogContent content={blog.content} />
+
+                <hr className="my-4" />
+
+                <div className="d-flex justify-content-between align-items-left">
+                    <div className="d-flex gap-2">
+                        <Button variant="outline-primary">
+                            <i className="bi bi-share me-2"></i>
+                            Share
+                        </Button>
+                        <Button variant="primary">
+                            <i className="bi bi-bookmark me-2"></i>
+                            Save
+                        </Button>
                     </div>
-                </Card.Body>
+                </div>
+            </Card.Body>
             </Card>
 
             <Card className="mt-4 shadow">

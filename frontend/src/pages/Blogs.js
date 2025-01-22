@@ -9,8 +9,7 @@ const Blogs = () => {
   const navigate = useNavigate();
 
   const blogList = useSelector((state) => state.blogList);
-  const { loading, error, blogs} = blogList || {};
-  console.log(blogs)
+  const { loading, error, blogs } = blogList;
 
   useEffect(() => {
     dispatch(listBlogs());
@@ -32,7 +31,7 @@ const Blogs = () => {
         <p>Loading ...</p>
       ) : error ? (
         <p>{error}</p>
-      ) : Array.isArray(blogs) && blogs.length > 0 ? (
+      ) : (
         <Row>
           {blogs.map((blog) => (
             <Col key={blog._id} sm={12} md={6} lg={4} className="mb-4">
@@ -40,7 +39,7 @@ const Blogs = () => {
                 <Card.Img 
                   variant="top" 
                   src={blog.image}
-                  style={{ height: '200px', objectFit: 'cover' }}
+                  className="img-fluid w-100 rounded"
                 />
                 <Card.Body className="d-flex flex-column">
                   <Card.Title className="mb-3">{blog.title}</Card.Title>
@@ -68,8 +67,6 @@ const Blogs = () => {
             </Col>
           ))}
         </Row>
-      ) : (
-        <p>No blogs found</p>
       )}
     </Container>
   );

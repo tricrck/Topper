@@ -1,4 +1,3 @@
-// CommentSection.js
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Card, Button, Form, Alert } from 'react-bootstrap';
@@ -6,60 +5,37 @@ import {
     createComment, 
     listComments, 
     updateComment, 
-    deleteComment 
+    deleteComment,
+    likeComment,
+    unlikeComment
 } from '../actions/blog_actions';
+import { fetchUserDetails } from '../actions/user_actions';
+import { Edit, Trash, ThumbsUp, MessageCircle } from "lucide-react";
 
-const CommentSection = ({ blogId }) => {
+// Separate Comment component to handle individual comments and their replies
+const Comment = ({ 
+    comment, 
+    blogId, 
+    user, 
+    level = 0,
+    onReply,
+    userDetails,
+    userDetailsLoading,
+    handleDelete,
+    handleEdit,
+    handleUpdate,
+    editingId,
+    updateLoading,
+    updateError,
+    editText,
+    setEditText
+}) => {
     const dispatch = useDispatch();
-    const [commentText, setCommentText] = useState('');
-    const [editingId, setEditingId] = useState(null);
-    const [editText, setEditText] = useState('');
     const [showReplyForm, setShowReplyForm] = useState(false);
-    const [error, setError] = useState('');
+    const [replyText, setReplyText] = useState('');
+    const maxLevel = 3; // Maximum nesting level
 
-    // Get current user from Redux store
-    // const userLogin = useSelector(state => state.userLogin);
-    // const { userInfo } = userLogin;
-
-    const userInfo = {
-        _id: '123',
-        name: 'John Doe',
-        email: 'john@example.com',
-        avatar: 'https://via.placeholder.com/40',
-        isAdmin: true
-    };
-
-    // Get comments from Redux store
-    const commentList = useSelector(state => state.commentList);
-    const { loading, error: commentError, comments } = commentList;
-
-    // Get comment create status
-    const commentCreate = useSelector(state => state.commentCreate);
-    const { 
-        loading: createLoading, 
-        error: createError, 
-        success: createSuccess 
-    } = commentCreate;
-
-    // Get comment update status
-    const commentUpdate = useSelector(state => state.commentUpdate);
-    const { 
-        loading: updateLoading, 
-        error: updateError, 
-        success: updateSuccess 
-    } = commentUpdate;
-
-    // Get comment delete status
-    const commentDelete = useSelector(state => state.commentDelete);
-    const { 
-        loading: deleteLoading, 
-        error: deleteError, 
-        success: deleteSuccess 
-    } = commentDelete;
-
-    useEffect(() => {
-        dispatch(listComments(blogId));
-    }, [dispatch, blogId, createSuccess, updateSuccess, deleteSuccess]);
+    const authorDetails = userDetails[comment.author] || null;
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('en-US', {
@@ -71,6 +47,235 @@ const CommentSection = ({ blogId }) => {
         });
     };
 
+    const handleLikeToggle = () => {
+        if (!user) return; // Add guard clause for user
+        
+        const likes = comment.likes || []; // Add default empty array if likes is undefined
+        if (likes.includes(user.uid)) {
+            dispatch(unlikeComment(blogId, comment._id, user.uid));
+        } else {
+            dispatch(likeComment(blogId, comment._id, user.uid));
+        }
+    };
+
+    const handleReplySubmit = (e) => {
+        e.preventDefault();
+        if (replyText.trim()) {
+            onReply({
+                content: replyText,
+                author: user.uid,
+                parentComment: comment._id
+            });
+            setReplyText('');
+            setShowReplyForm(false);
+        }
+    };
+
+    return (
+        <Card className={`mb-3 ${level > 0 ? 'ms-4' : ''}`}>
+            <Card.Body>
+                <div className="d-flex justify-content-between align-items-start">
+                    <div className="d-flex align-items-center">
+                        <img 
+                            src={authorDetails?.photoURL || '/default-avatar.png'}
+                            alt={authorDetails?.displayName || 'User'}
+                            className="rounded-circle me-2"
+                            style={{ width: '40px', height: '40px', objectFit: 'cover' }}
+                        />
+                        <div>
+                            <h6 className="mb-0">
+                                {userDetailsLoading 
+                                    ? 'Loading...' 
+                                    : authorDetails?.displayName || 
+                                      authorDetails?.email || 
+                                      'Anonymous User'
+                                }
+                            </h6>
+                            <small className="text-muted">
+                                {formatDate(comment.createdAt)}
+                                {comment.updatedAt !== comment.createdAt && ' (edited)'}
+                            </small>
+                        </div>
+                    </div>
+
+                    {user && user.uid === comment.author && (
+                        <div className="btn-group">
+                            <Button 
+                                variant="link" 
+                                size="sm"
+                                onClick={() => handleEdit(comment)}
+                            >
+                                <Edit size={20} />
+                            </Button>
+                            <Button 
+                                variant="link" 
+                                size="sm" 
+                                className="text-danger"
+                                onClick={() => handleDelete(comment._id)}
+                            >
+                                <Trash size={20} />
+                            </Button>
+                        </div>
+                    )}
+                </div>
+
+                {editingId === comment._id ? (
+                    <div className="mt-3">
+                        {updateError && <Alert variant="danger">{updateError}</Alert>}
+                        <Form.Group className="mb-2">
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={editText}
+                                onChange={(e) => setEditText(e.target.value)}
+                                disabled={updateLoading}
+                            />
+                        </Form.Group>
+                        <div className="d-flex gap-2">
+                            <Button 
+                                size="sm" 
+                                onClick={() => handleUpdate(comment._id)}
+                                disabled={updateLoading}
+                            >
+                                {updateLoading ? 'Updating...' : 'Update'}
+                            </Button>
+                            <Button 
+                                size="sm" 
+                                variant="secondary"
+                                onClick={() => handleEdit(null)}
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="mt-3">
+                        {comment.content.split('\n').map((paragraph, index) => (
+                            <p key={index} className="mb-2">{paragraph}</p>
+                        ))}
+                    </div>
+                )}
+
+                <div className="d-flex gap-3 align-items-center mt-3">
+                    {user && (
+                        <Button
+                            variant="link"
+                            className={`d-flex align-items-center gap-1 p-0 ${
+                                (comment.likes || []).includes(user.uid) ? 'text-primary' : 'text-muted'
+                            }`}
+                            onClick={handleLikeToggle}
+                        >
+                            <ThumbsUp 
+                                size={18}
+                                className={(comment.likes || []).includes(user.uid) ? 'fill-current' : ''}
+                            />
+                            <span className="text-sm font-medium">
+                                {(comment.likes || []).length > 0 
+                                    ? `${comment.likes.length} Likes` 
+                                    : 'Like'}
+                            </span>
+                        </Button>
+                    )}
+
+                    {user && level < maxLevel && (
+                        <Button
+                            variant="link"
+                            className="d-flex align-items-center gap-1 text-muted p-0"
+                            onClick={() => setShowReplyForm(!showReplyForm)}
+                        >
+                            <MessageCircle size={18} />
+                            <span className="text-sm font-medium">Reply</span>
+                        </Button>
+                    )}
+                </div>
+
+                {showReplyForm && (
+                    <Form onSubmit={handleReplySubmit} className="mt-3">
+                        <Form.Group>
+                            <Form.Control
+                                as="textarea"
+                                rows={2}
+                                value={replyText}
+                                onChange={(e) => setReplyText(e.target.value)}
+                                placeholder="Write your reply..."
+                                required
+                            />
+                        </Form.Group>
+                        <div className="d-flex gap-2 mt-2">
+                            <Button type="submit" size="sm">
+                                Submit Reply
+                            </Button>
+                            <Button 
+                                type="button" 
+                                size="sm" 
+                                variant="secondary"
+                                onClick={() => setShowReplyForm(false)}
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    </Form>
+                )}
+
+                {/* Render nested replies */}
+                {comment.replies && comment.replies.map(reply => (
+                    <Comment
+                        key={reply._id}
+                        comment={reply}
+                        blogId={blogId}
+                        user={user}
+                        level={level + 1}
+                        onReply={onReply}
+                        userDetails={userDetails}
+                        userDetailsLoading={userDetailsLoading}
+                        handleDelete={handleDelete}
+                        handleEdit={handleEdit}
+                        handleUpdate={handleUpdate}
+                        editingId={editingId}
+                        updateLoading={updateLoading}
+                        updateError={updateError}
+                        editText={editText}
+                        setEditText={setEditText}
+                    />
+                ))}
+            </Card.Body>
+        </Card>
+    );
+};
+
+const CommentSection = ({ blogId }) => {
+    const dispatch = useDispatch();
+    const [commentText, setCommentText] = useState('');
+    const [editingId, setEditingId] = useState(null);
+    const [editText, setEditText] = useState('');
+    const [error, setError] = useState('');
+
+    const { user } = useSelector((state) => state.auth);
+    const { comments, loading, error: commentError } = useSelector(state => state.commentList);
+    const { userDetails, userDetailsLoading } = useSelector((state) => state.users);
+    const { loading: createLoading, error: createError } = useSelector(state => state.commentCreate);
+    const { loading: updateLoading, error: updateError } = useSelector(state => state.commentUpdate);
+
+    useEffect(() => {
+        dispatch(listComments(blogId));
+    }, [dispatch, blogId]);
+
+    useEffect(() => {
+        if (comments?.length > 0) {
+            const authorIds = new Set();
+            const extractAuthors = (comment) => {
+                authorIds.add(comment.author);
+                comment.replies?.forEach(extractAuthors);
+            };
+            comments.forEach(extractAuthors);
+            authorIds.forEach(authorId => {
+                if (!userDetails[authorId]) {
+                    dispatch(fetchUserDetails(authorId));
+                }
+            });
+        }
+    }, [dispatch, comments, userDetails]);
+
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!commentText.trim()) {
@@ -79,15 +284,15 @@ const CommentSection = ({ blogId }) => {
         }
         dispatch(createComment(blogId, {
             content: commentText,
-            author: userInfo._id
+            author: user.uid
         }));
         setCommentText('');
         setError('');
     };
 
     const handleEdit = (comment) => {
-        setEditingId(comment._id);
-        setEditText(comment.content);
+        setEditingId(comment?._id);
+        setEditText(comment?.content || '');
     };
 
     const handleUpdate = (commentId) => {
@@ -107,10 +312,38 @@ const CommentSection = ({ blogId }) => {
         }
     };
 
+    const handleReply = (replyData) => {
+        dispatch(createComment(blogId, replyData));
+    };
+
+    // Organize comments into a tree structure
+    const organizeComments = (comments) => {
+        const commentMap = new Map();
+        const rootComments = [];
+
+        comments?.forEach(comment => {
+            commentMap.set(comment._id, { ...comment, replies: [] });
+        });
+
+        comments?.forEach(comment => {
+            if (comment.parentComment) {
+                const parent = commentMap.get(comment.parentComment);
+                if (parent) {
+                    parent.replies.push(commentMap.get(comment._id));
+                }
+            } else {
+                rootComments.push(commentMap.get(comment._id));
+            }
+        });
+
+        return rootComments;
+    };
+
+    const rootComments = organizeComments(comments);
+
     return (
         <div className="comment-section">
-            {/* Comment Form */}
-            {userInfo ? (
+            {user ? (
                 <Card className="mb-4">
                     <Card.Body>
                         <h5 className="mb-3">Leave a Comment</h5>
@@ -143,130 +376,31 @@ const CommentSection = ({ blogId }) => {
                 </Alert>
             )}
 
-            {/* Comments List */}
             {loading ? (
                 <div className="text-center">Loading comments...</div>
             ) : commentError ? (
                 <Alert variant="danger">{commentError}</Alert>
             ) : (
-                comments?.map((comment) => (
-                    <Card key={comment._id} className="mb-3">
-                        <Card.Body>
-                            <div className="d-flex justify-content-between align-items-start">
-                                <div className="d-flex align-items-center">
-                                    <img 
-                                        src={comment.author.avatar || '/default-avatar.png'}
-                                        alt={comment.author.name}
-                                        className="rounded-circle me-2"
-                                        style={{ width: '40px', height: '40px' }}
-                                    />
-                                    <div>
-                                        <h6 className="mb-0">{comment.author.name}</h6>
-                                        <small className="text-muted">
-                                            {formatDate(comment.createdAt)}
-                                            {comment.updatedAt !== comment.createdAt && 
-                                                ' (edited)'}
-                                        </small>
-                                    </div>
-                                </div>
-                                {userInfo && userInfo._id === comment.author._id && (
-                                    <div className="btn-group">
-                                        <Button 
-                                            variant="link" 
-                                            size="sm"
-                                            onClick={() => handleEdit(comment)}
-                                            disabled={updateLoading}
-                                        >
-                                            <i className="bi bi-pencil"></i>
-                                        </Button>
-                                        <Button 
-                                            variant="link" 
-                                            size="sm" 
-                                            className="text-danger"
-                                            onClick={() => handleDelete(comment._id)}
-                                            disabled={deleteLoading}
-                                        >
-                                            <i className="bi bi-trash"></i>
-                                        </Button>
-                                    </div>
-                                )}
-                            </div>
-
-                            {editingId === comment._id ? (
-                                <div className="mt-3">
-                                    {updateError && 
-                                        <Alert variant="danger">{updateError}</Alert>}
-                                    <Form.Group className="mb-2">
-                                        <Form.Control
-                                            as="textarea"
-                                            rows={3}
-                                            value={editText}
-                                            onChange={(e) => setEditText(e.target.value)}
-                                            disabled={updateLoading}
-                                        />
-                                    </Form.Group>
-                                    <div className="d-flex gap-2">
-                                        <Button 
-                                            size="sm" 
-                                            onClick={() => handleUpdate(comment._id)}
-                                            disabled={updateLoading}
-                                        >
-                                            {updateLoading ? 'Updating...' : 'Update'}
-                                        </Button>
-                                        <Button 
-                                            size="sm" 
-                                            variant="secondary"
-                                            onClick={() => setEditingId(null)}
-                                            disabled={updateLoading}
-                                        >
-                                            Cancel
-                                        </Button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="mt-3">
-                                    {comment.content.split('\n').map((paragraph, index) => (
-                                        <p key={index} className="mb-2">
-                                            {paragraph}
-                                        </p>
-                                    ))}
-                                </div>
-                            )}
-
-                            <div className="mt-3 d-flex gap-3">
-                                <Button 
-                                    variant="link" 
-                                    className="p-0 text-muted"
-                                    onClick={() => {}}
-                                >
-                                    <i className="bi bi-hand-thumbs-up me-1"></i>
-                                    Like
-                                </Button>
-                                <Button 
-                                    variant="link" 
-                                    className="p-0 text-muted"
-                                    onClick={() => setShowReplyForm(!showReplyForm)}
-                                >
-                                    <i className="bi bi-reply me-1"></i>
-                                    Reply
-                                </Button>
-                            </div>
-                        </Card.Body>
-                    </Card>
+                rootComments.map(comment => (
+                    <Comment
+                        key={comment._id}
+                        comment={comment}
+                        blogId={blogId}
+                        user={user}
+                        onReply={handleReply}
+                        userDetails={userDetails}
+                        userDetailsLoading={userDetailsLoading}
+                        handleDelete={handleDelete}
+                        handleEdit={handleEdit}
+                        handleUpdate={handleUpdate}
+                        editingId={editingId}
+                        updateLoading={updateLoading}
+                        updateError={updateError}
+                        editText={editText}
+                        setEditText={setEditText}
+                    />
                 ))
             )}
-
-            <style jsx="true">{`
-                .comment-section {
-                    margin-top: 2rem;
-                }
-                .btn-link {
-                    text-decoration: none;
-                }
-                .comment-body {
-                    white-space: pre-line;
-                }
-            `}</style>
         </div>
     );
 };

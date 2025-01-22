@@ -9,6 +9,7 @@ const Portfolio = () => {
   const portfolioList = useSelector((state) => state.portfolioList);
   const { loading, error, portfolios } = portfolioList;
 
+
   useEffect(() => {
     dispatch(listPortfolios());
   }, [dispatch]);
@@ -42,8 +43,8 @@ const Portfolio = () => {
                     variant="top" 
                     src={item.image} 
                     alt={item.title} 
-                    style={{ width: '100px', height: '100px', objectFit: 'cover', marginRight: '15px' }}
-                  />
+                    className="img-fluid w-25"
+                    />
                 )}
                 <Card.Body>
                   <Row>

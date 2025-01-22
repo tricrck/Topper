@@ -8,7 +8,10 @@ const AdminBlogEdit = () => {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    author: ''
+    author: '',
+    tags: '',
+    image: '',
+    isPublished: false,
   });
 
   const dispatch = useDispatch();
@@ -33,22 +36,25 @@ const AdminBlogEdit = () => {
       setFormData({
         title: blog.title || '',
         content: blog.content || '',
-        author: blog.author || ''
+        author: blog.author || '',
+        tags: blog.tags || '',
+        image: blog.image || '',
+        isPublished: blog.isPublished || false
       });
     }
   }, [blog]);
 
   useEffect(() => {
     if (updateSuccess) {
-      window.location.href = '/admin/blogs';
+      window.location.href = '/admin/bloglist';
     }
   }, [updateSuccess]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, type, value, checked } = e.target;
     setFormData(prevState => ({
       ...prevState,
-      [name]: value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -128,6 +134,40 @@ const AdminBlogEdit = () => {
             required
           />
         </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Tags</Form.Label>
+          <Form.Control
+            type="text"
+            name="tags"
+            value={formData.tags}
+            onChange={handleChange}
+            placeholder="Enter Tag name"
+            required
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Image</Form.Label>
+          <Form.Control
+            type="text"
+            name="image"
+            value={formData.image}
+            onChange={handleChange}
+            placeholder="Enter Image link"
+            required
+          />
+        </Form.Group>
+
+          <Form.Group className="mb-4">
+            <Form.Check
+              type="checkbox"
+              name="isPublished"
+              label="Publish immediately"
+              checked={formData.isPublished}
+              onChange={handleChange}
+            />
+          </Form.Group>
 
         <div className="d-flex gap-2">
           <Button 

@@ -2,20 +2,29 @@ import React, { useEffect } from 'react';
 import { Container, Row, Col, Badge } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { listTestimonials } from '../actions/testimonial_actions';
+import { listPortfolios } from '../actions/portfolio_actions';
 
 const Home = () => {
-  const skills = [
-    'Python', 'JavaScript', 'Full-Stack Development', 'Docker',
-    'Software Development', 'CSS', 'PostgreSQL', 'MySQL',
-    'Java', 'C++', 'Linux', 'Kubernetes',
-  ];
   const dispatch = useDispatch();
 
   const testimonialsList = useSelector((state) => state.testimonialsList);
   const { loading, error, testimonials } = testimonialsList;
+  
+    const portfolioList = useSelector((state) => state.portfolioList);
+    const { portfolios } = portfolioList;
+    const skills = [
+      ...new Set(
+        (portfolios || []) // Ensure portfolios is defined and is an array
+          .map((portfolio) => portfolio.skills || []) // Ensure skills is defined and is an array
+          .flat() // Flatten the nested arrays
+          .map((skill) => skill.trim()) // Trim whitespace
+      )
+    ];
+  
 
   useEffect(() => {
     dispatch(listTestimonials());
+    dispatch(listPortfolios());
   }, [dispatch]);
 
   return (

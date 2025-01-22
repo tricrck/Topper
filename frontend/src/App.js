@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation, Navigate  } from 'react-router-dom';
 import Header from './components/Header'
 import Footer from './components/Footer'
 import Home from './pages/Home';
@@ -19,11 +19,32 @@ import AdminTestimonyCreate from './pages/Admin/AdminTestimonyCreate';
 import AdminTestimonyEdit from './pages/Admin/AdminTestimonyEdit';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
+import AdminHeader from './components/AdminHeader';
+import Dashboard from './components/Dashboard';
+import { useSelector } from 'react-redux';
+import { checkIsAdmin } from './utils/auth'
+
+
+// Custom Header Selector
+const AppHeader = () => {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin");
+
+  return isAdminRoute ? <AdminHeader /> : <Header />;
+};
+
+const AdminRoute = ({ element, ...rest }) => {
+  const { user } = useSelector((state) => state.auth);
+  const isAdmin = checkIsAdmin(user?.email);
+
+  // If the user is not an admin, redirect to the home page
+  return isAdmin ? element : <Navigate to="/" />;
+};
 
 function App() {
   return (
     <Router>
-      <Header/>
+      <AppHeader/>
        <main className="py-3">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -32,18 +53,19 @@ function App() {
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/blogs/:id" element={<BlogDetails />} />
 
-          {/* Admin Routes */}
-          <Route path="/admin/bloglist" element={<AdminBlogList />} />
-          <Route path="/admin/blogs/edit/:id?" element={<AdminBlogEdit />} />
-          <Route path="/admin/blogs/create" element={<AdminBlogAdd />} />
+          {/* Protected Admin Routes */}
+          <Route path="/admin/bloglist" element={<AdminRoute element={<AdminBlogList />} />} />
+          <Route path="/admin/blogs/edit/:id?" element={<AdminRoute element={<AdminBlogEdit />} />} />
+          <Route path="/admin/blogs/create" element={<AdminRoute element={<AdminBlogAdd />} />} />
 
-          <Route path="/admin/portfoliolist" element={<AdminPortfolioList />} />
-          <Route path="/admin/portfolio/edit/:id" element={<AdminPortfolioEdit />} />
-          <Route path="/admin/portfolio/create" element={<AdminPortfolioCreate />} />
+          <Route path="/admin/portfoliolist" element={<AdminRoute element={<AdminPortfolioList />} />} />
+          <Route path="/admin/portfolio/edit/:id" element={<AdminRoute element={<AdminPortfolioEdit />} />} />
+          <Route path="/admin/portfolio/create" element={<AdminRoute element={<AdminPortfolioCreate />} />} />
 
-          <Route path="/admin/testimonialist" element={<AdminTestimonyList />} />
-          <Route path="/admin/testimonial/create" element={<AdminTestimonyCreate />} />
-          <Route path="/admin/testimonial/edit/:id" element={<AdminTestimonyEdit />} />
+          <Route path="/admin/testimonialist" element={<AdminRoute element={<AdminTestimonyList />} />} />
+          <Route path="/admin/testimonial/create" element={<AdminRoute element={<AdminTestimonyCreate />} />} />
+          <Route path="/admin/testimonial/edit/:id" element={<AdminRoute element={<AdminTestimonyEdit />} />} />
+          <Route path="/admin" element={<AdminRoute element={<Dashboard />} />} />
 
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />

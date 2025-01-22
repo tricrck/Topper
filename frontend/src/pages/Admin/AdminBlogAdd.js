@@ -11,9 +11,9 @@ const AdminBlogAdd = () => {
     author: 'Patrick Cheruiyot',
     tags: [],
     image: '',
-    isPublished: false
+    isPublished: false,
   });
-  
+
   const [tagInput, setTagInput] = useState('');
   const [previewImage, setPreviewImage] = useState('');
   const [validated, setValidated] = useState(false);
@@ -23,52 +23,47 @@ const AdminBlogAdd = () => {
 
   useEffect(() => {
     if (success) {
-      window.location.href = '/admin/blogs';
+      window.location.href = '/admin/bloglist';
     }
   }, [success]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result);
-        setFormData(prev => ({ ...prev, image: reader.result }));
-      };
-      reader.readAsDataURL(file);
-    }
+  
+  const handleImageURLChange = (e) => {
+    const url = e.target.value;
+    setFormData((prev) => ({ ...prev, image: url }));
+    setPreviewImage(url);
   };
 
   const handleTagAdd = (e) => {
     e.preventDefault();
     if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        tags: [...prev.tags, tagInput.trim()]
+        tags: [...prev.tags, tagInput.trim()],
       }));
       setTagInput('');
     }
   };
 
   const removeTag = (tagToRemove) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
+      tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
   };
 
   const submitHandler = (e) => {
     e.preventDefault();
     const form = e.currentTarget;
-    
+
     if (form.checkValidity() === false) {
       e.stopPropagation();
       setValidated(true);
@@ -83,9 +78,9 @@ const AdminBlogAdd = () => {
       <Card className="p-4">
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h1>Create New Blog</h1>
-          <Button 
+          <Button
             variant="secondary"
-            onClick={() => window.location.href = '/admin/blogs'}
+            onClick={() => (window.location.href = '/admin/bloglist')}
           >
             Back to Blogs
           </Button>
@@ -98,6 +93,7 @@ const AdminBlogAdd = () => {
         )}
 
         <Form noValidate validated={validated} onSubmit={submitHandler}>
+          {/* Title */}
           <Form.Group className="mb-3">
             <Form.Label>Title</Form.Label>
             <Form.Control
@@ -113,6 +109,7 @@ const AdminBlogAdd = () => {
             </Form.Control.Feedback>
           </Form.Group>
 
+          {/* Content */}
           <Form.Group className="mb-3">
             <Form.Label>Content</Form.Label>
             <Form.Control
@@ -129,6 +126,7 @@ const AdminBlogAdd = () => {
             </Form.Control.Feedback>
           </Form.Group>
 
+          {/* Author */}
           <Form.Group className="mb-3">
             <Form.Label>Author</Form.Label>
             <Form.Control
@@ -140,6 +138,7 @@ const AdminBlogAdd = () => {
             />
           </Form.Group>
 
+          {/* Tags */}
           <Form.Group className="mb-3">
             <Form.Label>Tags</Form.Label>
             <div className="d-flex gap-2 mb-2">
@@ -155,14 +154,14 @@ const AdminBlogAdd = () => {
             </div>
             <div className="d-flex flex-wrap gap-2">
               {formData.tags.map((tag, index) => (
-                <span 
-                  key={index} 
+                <span
+                  key={index}
                   className="badge bg-primary d-flex align-items-center gap-2"
                 >
                   {tag}
-                  <Button 
-                    variant="link" 
-                    className="p-0 text-white" 
+                  <Button
+                    variant="link"
+                    className="p-0 text-white"
                     onClick={() => removeTag(tag)}
                   >
                     ×
@@ -172,23 +171,28 @@ const AdminBlogAdd = () => {
             </div>
           </Form.Group>
 
+          {/* Image */}
           <Form.Group className="mb-3">
             <Form.Label>Image</Form.Label>
-            <Form.Control
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
+            <div className="d-flex flex-column">
+              <Form.Control
+                type="url"
+                placeholder="Enter image URL"
+                onChange={handleImageURLChange}
+                className="mb-2"
+              />
+            </div>
             {previewImage && (
-              <img 
-                src={previewImage} 
-                alt="Preview" 
+              <img
+                src={previewImage}
+                alt="Preview"
                 className="mt-2"
-                style={{ maxWidth: '200px' }} 
+                style={{ maxWidth: '200px' }}
               />
             )}
           </Form.Group>
 
+          {/* Publish */}
           <Form.Group className="mb-4">
             <Form.Check
               type="checkbox"
@@ -199,12 +203,9 @@ const AdminBlogAdd = () => {
             />
           </Form.Group>
 
+          {/* Buttons */}
           <div className="d-flex gap-2">
-            <Button 
-              variant="primary" 
-              type="submit"
-              disabled={loading}
-            >
+            <Button variant="primary" type="submit" disabled={loading}>
               {loading ? (
                 <>
                   <Spinner
@@ -221,9 +222,9 @@ const AdminBlogAdd = () => {
                 'Create Blog'
               )}
             </Button>
-            <Button 
+            <Button
               variant="outline-secondary"
-              onClick={() => window.location.href = '/admin/blogs'}
+              onClick={() => (window.location.href = '/admin/blogs')}
               disabled={loading}
             >
               Cancel
