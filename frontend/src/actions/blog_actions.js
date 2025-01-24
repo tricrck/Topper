@@ -148,7 +148,7 @@ export const createComment = (blogId, commentData) => async (dispatch) => {
 
         const { data } = await axios.post(`${url}/blogs/${blogId}/comments`, {
             ...commentData,
-            parentComment: commentData.parentId || null // Adding support for nested replies
+            parentComment: commentData.parentComment || null
         });
 
         dispatch({

@@ -178,23 +178,40 @@ router.delete("/:blogId/comments/:commentId", async (req, res) => {
 // Like a comment
 router.post("/:blogId/comments/:commentId/like", async (req, res) => {
   try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
     const comment = await Comment.findById(req.params.commentId);
     if (!comment) {
       return res.status(404).json({ message: "Comment not found" });
     }
 
-    // Add user ID to the likes array if not already present
-    if (!comment.likes.includes(req.body.userId)) {
-      comment.likes.push(req.body.userId);
-      await comment.save();
-      return res.json({ message: "Comment liked", likes: comment.likes.length });
+    const hasLiked = comment.likes.includes(userId);
+
+    if (hasLiked) {
+      // Unlike if already liked
+      comment.likes = comment.likes.filter((likeId) => likeId !== userId);
     } else {
-      return res.status(400).json({ message: "You already liked this comment" });
+      // Like if not already liked
+      comment.likes.push(userId);
     }
+
+    await comment.save();
+
+    res.status(200).json({
+      message: hasLiked ? "Comment like removed" : "Comment liked",
+      likesCount: comment.likes.length,
+      likes: comment.likes, // Return the list of user IDs
+    });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error("Error:", err.message);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
+
 
 // Unlike a comment
 router.post("/:blogId/comments/:commentId/unlike", async (req, res) => {
