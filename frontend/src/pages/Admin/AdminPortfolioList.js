@@ -1,24 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Table, Container, Button, Row, Col } from 'react-bootstrap';
+import { Table, Container, Button, Row, Col, Pagination } from 'react-bootstrap';
 import { listPortfolios, deletePortfolio } from '../../actions/portfolio_actions';
 import Loader from '../../components/Loader';
 import Message from '../../components/Message';
+import { Search, Edit, Trash, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 
 const AdminPortfolioList = () => {
   const dispatch = useDispatch();
   const [deleteInProgress, setDeleteInProgress] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: 'title', direction: 'asc' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const portfoliosPerPage = 10;
 
   const portfolioList = useSelector((state) => state.portfolioList);
   const { loading, error, portfolios = [] } = portfolioList;
 
   const portfolioDelete = useSelector((state) => state.portfolioDelete);
-  const { 
-    loading: deleteLoading, 
-    error: deleteError, 
-    success: deleteSuccess 
+  const {
+    loading: deleteLoading,
+    error: deleteError,
+    success: deleteSuccess
   } = portfolioDelete;
 
   useEffect(() => {
@@ -50,7 +53,7 @@ const AdminPortfolioList = () => {
   };
 
   const filteredAndSortedPortfolios = portfolios
-    .filter(portfolio => 
+    .filter(portfolio =>
       portfolio.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       portfolio.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
       portfolio.technologies.join(' ').toLowerCase().includes(searchTerm.toLowerCase())
@@ -63,9 +66,15 @@ const AdminPortfolioList = () => {
     });
 
   const getSortIcon = (key) => {
-    if (sortConfig.key !== key) return '↕️';
-    return sortConfig.direction === 'asc' ? '↑' : '↓';
+    if (sortConfig.key !== key) return <ArrowUpDown />;
+    return sortConfig.direction === 'asc' ? <ArrowUp /> : <ArrowDown />;
   };
+
+  const indexOfLastPortfolio = currentPage * portfoliosPerPage;
+  const indexOfFirstPortfolio = indexOfLastPortfolio - portfoliosPerPage;
+  const currentPortfolios = filteredAndSortedPortfolios.slice(indexOfFirstPortfolio, indexOfLastPortfolio);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   if (loading) return <Loader />;
 
@@ -76,7 +85,7 @@ const AdminPortfolioList = () => {
           <h1 className="text-2xl font-bold">Manage Portfolios</h1>
         </Col>
         <Col className="text-end">
-          <Button 
+          <Button
             variant="success"
             href="/admin/portfolio/create"
             className="shadow-sm"
@@ -91,13 +100,18 @@ const AdminPortfolioList = () => {
 
       <Row className="mb-4">
         <Col md={6}>
-          <input
-            type="text"
-            placeholder="Search portfolios..."
-            className="form-control"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <div className="input-group">
+            <input
+              type="text"
+              placeholder="Search portfolios..."
+              className="form-control"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <span className="input-group-text">
+              <Search />
+            </span>
+          </div>
         </Col>
         <Col md={6} className="text-end">
           <span className="text-muted">
@@ -124,7 +138,7 @@ const AdminPortfolioList = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredAndSortedPortfolios.map((portfolio) => (
+              {currentPortfolios.map((portfolio) => (
                 <tr key={portfolio._id}>
                   <td className="align-middle">
                     {portfolio.title.length > 50
@@ -152,7 +166,7 @@ const AdminPortfolioList = () => {
                       href={`/admin/portfolio/edit/${portfolio._id}`}
                       disabled={deleteInProgress || deleteLoading}
                     >
-                      Edit
+                      <Edit />
                     </Button>
                     <Button
                       variant="outline-danger"
@@ -166,7 +180,7 @@ const AdminPortfolioList = () => {
                           <span className="ms-2">Deleting...</span>
                         </>
                       ) : (
-                        'Delete'
+                        <Trash />
                       )}
                     </Button>
                   </td>
@@ -174,6 +188,17 @@ const AdminPortfolioList = () => {
               ))}
             </tbody>
           </Table>
+          <Pagination>
+            {[...Array(Math.ceil(filteredAndSortedPortfolios.length / portfoliosPerPage)).keys()].map(number => (
+              <Pagination.Item
+                key={number + 1}
+                active={number + 1 === currentPage}
+                onClick={() => paginate(number + 1)}
+              >
+                {number + 1}
+              </Pagination.Item>
+            ))}
+          </Pagination>
         </div>
       )}
     </Container>

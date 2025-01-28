@@ -1,104 +1,134 @@
 import React, { useState } from 'react';
-import { Container, Navbar, Nav, Modal } from 'react-bootstrap';
+import { 
+  Container, Navbar, Nav, Modal, 
+  Image, Row, Col, Badge 
+} from 'react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
-import { User } from 'lucide-react';
-import Login from '../pages/Login';  // Import your existing Login component
-import { Link } from 'react-router-dom'
+import { 
+  User, House, BookOpen, Briefcase, 
+  MessageSquare, LogIn 
+} from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { logout } from '../actions/user_actions';
-import Profile from '../pages/Profile'
+import Login from '../pages/Login';
+import Profile from '../pages/Profile';
 
 const Header = () => {
   const [showModal, setShowModal] = useState(false);
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const modalLoginProps = {
-    containerClassName: "", // Remove full-height container
-    cardClassName: "", // Remove shadow since modal has its own
-    titleSize: "h3", // Smaller title for modal
-    titleFont: "fw-semibold", // Slightly less bold
-    cardWidth: { xs: 12 }, // Take full width of modal
-    cardPadding: "p-4", // Slightly less padding
-    isModal: true // Flag to indicate modal context
-  };
+  const navLinks = [
+    { path: '/', name: 'Home', icon: <House size={18} className="me-1" /> },
+    { path: '/portfolios', name: 'Work', icon: <Briefcase size={18} className="me-1" /> },
+    { path: '/blogs', name: 'Blog', icon: <BookOpen size={18} className="me-1" /> },
+    { path: '/contact', name: 'Contact', icon: <MessageSquare size={18} className="me-1" /> }
+  ];
 
   const handleLogout = () => {
-    dispatch(logout()); // Adjust according to your logout action
+    dispatch(logout());
     setShowModal(false);
+    navigate('/');
   };
 
   return (
-    <header>
-      <Container className="py-4">
-        <div className="d-flex align-items-center justify-content-between profile-header">
-          <div className="d-flex align-items-center">
-            <img
-              src="https://raw.githubusercontent.com/tricrck/Topper/refs/heads/main/public/images/self.png"
+    <header className="border-bottom">
+      {/* Profile Header */}
+      <Container className="py-3">
+        <Row className="align-items-center g-3">
+          <Col xs="auto">
+            <Image
+              src="https://raw.githubusercontent.com/tricrck/Topper/main/public/images/self.png"
               alt="Patrick C."
-              className="profile-pic rounded-circle"
-              style={{ width: '100px', height: '100px', marginRight: '20px' }}
+              roundedCircle
+              className="shadow-sm"
+              style={{ width: '80px', height: '80px' }}
             />
-            <div className="profile-info text-black">
-              <h1>Patrick C.</h1>
-              <p>Software Developer | Based in Kericho, Kenya</p>
+          </Col>
+          <Col>
+            <div className="d-flex flex-column">
+              <h1 className="h4 mb-0 fw-bold">Patrick C.</h1>
+              <span className="text-muted">Developer</span>
+              <Badge bg="light" text="dark" className="mt-1 rounded-pill align-self-start">
+                Kericho, Kenya
+              </Badge>
             </div>
-          </div>
-          
-          {/* User Icon/Profile Picture */}
-          <div 
-            onClick={() => setShowModal(true)} 
-            className="cursor-pointer"
-            style={{ cursor: 'pointer' }}
-          >
-            {user?.photoURL ? (
-              <img
-                src={user.photoURL}
-                alt="Profile"
-                className="rounded-circle"
-                style={{ width: '40px', height: '40px' }}
-              />
-            ) : (
-              <User size={24} />
-            )}
-          </div>
-        </div>
+          </Col>
+          <Col xs="auto">
+            <div 
+              onClick={() => setShowModal(true)}
+              className="d-flex align-items-center gap-2 cursor-pointer hover-scale"
+            >
+              {user?.photoURL ? (
+                <Image
+                  src={user.photoURL}
+                  alt="Profile"
+                  roundedCircle
+                  style={{ width: '40px', height: '40px' }}
+                />
+              ) : (
+                <>
+                  <User size={24} />
+                  <span className="d-none d-lg-inline">{user ? 'Profile' : 'Login'}</span>
+                </>
+              )}
+            </div>
+          </Col>
+        </Row>
       </Container>
 
-      <Navbar variant="light" expand="lg">
+      {/* Navigation Bar */}
+      <Navbar expand="lg">
         <Container>
-          <Navbar.Brand href="/">Dev</Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="ms-auto">
-               <Nav.Item>
-                <Link to="/" className="nav-link">Home</Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Link to="/portfolios" className="nav-link">Portfolio</Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Link to="/contact" className="nav-link">Contact</Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Link to="/blogs" className="nav-link">Blog</Link>
-              </Nav.Item>
+          <Navbar.Toggle aria-controls="main-nav" />
+          <Navbar.Collapse id="main-nav">
+            <Nav className="w-100 justify-content-between">
+              {navLinks.map((link) => (
+                <Nav.Item key={link.path}>
+                  <Link 
+                    to={link.path} 
+                    className={`nav-link d-flex align-items-center ${
+                      location.pathname === link.path ? 'active fw-bold' : ''
+                    }`}
+                  >
+                    {link.icon}
+                    {link.name}
+                  </Link>
+                </Nav.Item>
+              ))}
             </Nav>
           </Navbar.Collapse>
         </Container>
       </Navbar>
 
-      {/* Authentication/Profile Modal */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {user ? 'Profile' : 'Login'}
+      {/* Auth Modal */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton className="border-0 pb-0">
+          <Modal.Title className="h5">
+            {user ? (
+              <div className="d-flex align-items-center gap-2">
+                <User size={24} />
+                Account Overview
+              </div>
+            ) : (
+              <div className="d-flex align-items-center gap-2">
+                <LogIn size={24} />
+                Welcome Back
+              </div>
+            )}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {user ? (
             <Profile onLogout={handleLogout} />
           ) : (
-              <Login {...modalLoginProps} />
+            <Login 
+              containerClassName="p-0" 
+              titleSize="h5" 
+              cardPadding="p-0"
+            />
           )}
         </Modal.Body>
       </Modal>

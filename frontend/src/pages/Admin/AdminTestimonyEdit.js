@@ -111,10 +111,10 @@ const AdminTestimonyEdit = () => {
   const handleCancel = () => {
     if (isFormDirty) {
       if (window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
-        navigate('/admin/testimonialist');
+        navigate('/admin/testimonials');
       }
     } else {
-      navigate('/admin/testimonialist');
+      navigate('/admin/testimonials');
     }
   };
 

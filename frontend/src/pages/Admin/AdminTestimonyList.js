@@ -1,24 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Table, Container, Button, Row, Col } from 'react-bootstrap';
+import { Table, Container, Button, Row, Col, Pagination } from 'react-bootstrap';
 import { listTestimonials, deleteTestimonial } from '../../actions/testimonial_actions';
 import Loader from '../../components/Loader';
 import Message from '../../components/Message';
+import { Search, Edit, Trash, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 
 const AdminTestimonyList = () => {
   const dispatch = useDispatch();
   const [deleteInProgress, setDeleteInProgress] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const testimonialsPerPage = 10;
 
   const testimonialsList = useSelector((state) => state.testimonialsList);
   const { loading, error, testimonials = [] } = testimonialsList;
 
   const testimonialDelete = useSelector((state) => state.testimonialDelete);
-  const { 
-    loading: deleteLoading, 
-    error: deleteError, 
-    success: deleteSuccess 
+  const {
+    loading: deleteLoading,
+    error: deleteError,
+    success: deleteSuccess
   } = testimonialDelete;
 
   useEffect(() => {
@@ -50,7 +53,7 @@ const AdminTestimonyList = () => {
   };
 
   const filteredAndSortedTestimonials = testimonials
-    .filter(testimony => 
+    .filter(testimony =>
       testimony.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       testimony.testimonial.toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -62,9 +65,15 @@ const AdminTestimonyList = () => {
     });
 
   const getSortIcon = (key) => {
-    if (sortConfig.key !== key) return '↕️';
-    return sortConfig.direction === 'asc' ? '↑' : '↓';
+    if (sortConfig.key !== key) return <ArrowUpDown />;
+    return sortConfig.direction === 'asc' ? <ArrowUp /> : <ArrowDown />;
   };
+
+  const indexOfLastTestimonial = currentPage * testimonialsPerPage;
+  const indexOfFirstTestimonial = indexOfLastTestimonial - testimonialsPerPage;
+  const currentTestimonials = filteredAndSortedTestimonials.slice(indexOfFirstTestimonial, indexOfLastTestimonial);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   if (loading) return <Loader />;
 
@@ -75,9 +84,9 @@ const AdminTestimonyList = () => {
           <h1 className="text-2xl font-bold">Manage Testimonials</h1>
         </Col>
         <Col className="text-end">
-          <Button 
+          <Button
             variant="success"
-            href="/admin/testimonials/create"
+            href="/admin/testimonial/create"
             className="shadow-sm"
           >
             Add New Testimony
@@ -90,13 +99,18 @@ const AdminTestimonyList = () => {
 
       <Row className="mb-4">
         <Col md={6}>
-          <input
-            type="text"
-            placeholder="Search testimonials..."
-            className="form-control"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <div className="input-group">
+            <input
+              type="text"
+              placeholder="Search testimonials..."
+              className="form-control"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <span className="input-group-text">
+              <Search />
+            </span>
+          </div>
         </Col>
         <Col md={6} className="text-end">
           <span className="text-muted">
@@ -122,7 +136,7 @@ const AdminTestimonyList = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredAndSortedTestimonials.map((testimony) => (
+              {currentTestimonials.map((testimony) => (
                 <tr key={testimony._id}>
                   <td className="align-middle">{testimony.name}</td>
                   <td className="align-middle">
@@ -138,7 +152,7 @@ const AdminTestimonyList = () => {
                       href={`/admin/testimonial/edit/${testimony._id}`}
                       disabled={deleteInProgress || deleteLoading}
                     >
-                      Edit
+                      <Edit />
                     </Button>
                     <Button
                       variant="outline-danger"
@@ -152,7 +166,7 @@ const AdminTestimonyList = () => {
                           <span className="ms-2">Deleting...</span>
                         </>
                       ) : (
-                        'Delete'
+                        <Trash />
                       )}
                     </Button>
                   </td>
@@ -160,6 +174,17 @@ const AdminTestimonyList = () => {
               ))}
             </tbody>
           </Table>
+          <Pagination>
+            {[...Array(Math.ceil(filteredAndSortedTestimonials.length / testimonialsPerPage)).keys()].map(number => (
+              <Pagination.Item
+                key={number + 1}
+                active={number + 1 === currentPage}
+                onClick={() => paginate(number + 1)}
+              >
+                {number + 1}
+              </Pagination.Item>
+            ))}
+          </Pagination>
         </div>
       )}
     </Container>

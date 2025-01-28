@@ -1,247 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Card, Button, Form, Alert } from 'react-bootstrap';
+import { Card, Button, Form, Alert, Spinner } from 'react-bootstrap';
 import { 
     createComment, 
     listComments, 
     updateComment, 
     deleteComment,
-    likeComment,
-    unlikeComment
 } from '../actions/blog_actions';
 import { fetchUserDetails } from '../actions/user_actions';
-import { Edit, Trash, ThumbsUp, MessageCircle } from "lucide-react";
-
-// Separate Comment component to handle individual comments and their replies
-const Comment = ({ 
-    comment, 
-    blogId, 
-    user, 
-    level = 0,
-    onReply,
-    userDetails,
-    userDetailsLoading,
-    handleDelete,
-    handleEdit,
-    handleUpdate,
-    editingId,
-    updateLoading,
-    updateError,
-    editText,
-    setEditText
-}) => {
-    const dispatch = useDispatch();
-    const [showReplyForm, setShowReplyForm] = useState(false);
-    const [replyText, setReplyText] = useState('');
-    const maxLevel = 3; // Maximum nesting level
-
-    const authorDetails = userDetails[comment.author] || null;
-
-    const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
-
-    const handleLikeToggle = () => {
-        if (!user) return; // Add guard clause for user
-        
-        const likes = comment.likes || []; // Add default empty array if likes is undefined
-        if (likes.includes(user.uid)) {
-            dispatch(unlikeComment(blogId, comment._id, user.uid));
-        } else {
-            dispatch(likeComment(blogId, comment._id, user.uid));
-        }
-    };
-
-    const handleReplySubmit = (e) => {
-        e.preventDefault();
-        if (replyText.trim()) {
-            onReply({
-                content: replyText,
-                author: user.uid,
-                parentComment: comment._id
-            });
-            setReplyText('');
-            setShowReplyForm(false);
-        }
-    };
-
-    return (
-        <Card className={`mb-3 ${level > 0 ? 'ms-4' : ''}`}>
-            <Card.Body>
-                <div className="d-flex justify-content-between align-items-start">
-                    <div className="d-flex align-items-center">
-                        <img 
-                            src={authorDetails?.photoURL || '/default-avatar.png'}
-                            alt={authorDetails?.displayName || 'User'}
-                            className="rounded-circle me-2"
-                            style={{ width: '40px', height: '40px', objectFit: 'cover' }}
-                        />
-                        <div>
-                            <h6 className="mb-0">
-                                {userDetailsLoading 
-                                    ? 'Loading...' 
-                                    : authorDetails?.displayName || 
-                                      authorDetails?.email || 
-                                      'Anonymous User'
-                                }
-                            </h6>
-                            <small className="text-muted">
-                                {formatDate(comment.createdAt)}
-                                {comment.updatedAt !== comment.createdAt && ' (edited)'}
-                            </small>
-                        </div>
-                    </div>
-
-                    {user && user.uid === comment.author && (
-                        <div className="btn-group">
-                            <Button 
-                                variant="link" 
-                                size="sm"
-                                onClick={() => handleEdit(comment)}
-                            >
-                                <Edit size={20} />
-                            </Button>
-                            <Button 
-                                variant="link" 
-                                size="sm" 
-                                className="text-danger"
-                                onClick={() => handleDelete(comment._id)}
-                            >
-                                <Trash size={20} />
-                            </Button>
-                        </div>
-                    )}
-                </div>
-
-                {editingId === comment._id ? (
-                    <div className="mt-3">
-                        {updateError && <Alert variant="danger">{updateError}</Alert>}
-                        <Form.Group className="mb-2">
-                            <Form.Control
-                                as="textarea"
-                                rows={3}
-                                value={editText}
-                                onChange={(e) => setEditText(e.target.value)}
-                                disabled={updateLoading}
-                            />
-                        </Form.Group>
-                        <div className="d-flex gap-2">
-                            <Button 
-                                size="sm" 
-                                onClick={() => handleUpdate(comment._id)}
-                                disabled={updateLoading}
-                            >
-                                {updateLoading ? 'Updating...' : 'Update'}
-                            </Button>
-                            <Button 
-                                size="sm" 
-                                variant="secondary"
-                                onClick={() => handleEdit(null)}
-                            >
-                                Cancel
-                            </Button>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="mt-3">
-                        {comment.content.split('\n').map((paragraph, index) => (
-                            <p key={index} className="mb-2">{paragraph}</p>
-                        ))}
-                    </div>
-                )}
-
-                <div className="d-flex gap-3 align-items-center mt-3">
-                    {user && (
-                        <Button
-                            variant="link"
-                            className={`d-flex align-items-center gap-1 p-0 ${
-                                (comment.likes || []).includes(user.uid) ? 'text-primary' : 'text-muted'
-                            }`}
-                            onClick={handleLikeToggle}
-                        >
-                            <ThumbsUp 
-                                size={18}
-                                className={(comment.likes || []).includes(user.uid) ? 'fill-current' : ''}
-                            />
-                            <span className="text-sm font-medium">
-                                {(comment.likes || []).length > 0 
-                                    ? `${comment.likes.length} Likes` 
-                                    : 'Like'}
-                            </span>
-                        </Button>
-                    )}
-
-                    {user && level < maxLevel && (
-                        <Button
-                            variant="link"
-                            className="d-flex align-items-center gap-1 text-muted p-0"
-                            onClick={() => setShowReplyForm(!showReplyForm)}
-                        >
-                            <MessageCircle size={18} />
-                            <span className="text-sm font-medium">Reply</span>
-                        </Button>
-                    )}
-                </div>
-
-                {showReplyForm && (
-                    <Form onSubmit={handleReplySubmit} className="mt-3">
-                        <Form.Group>
-                            <Form.Control
-                                as="textarea"
-                                rows={2}
-                                value={replyText}
-                                onChange={(e) => setReplyText(e.target.value)}
-                                placeholder="Write your reply..."
-                                required
-                            />
-                        </Form.Group>
-                        <div className="d-flex gap-2 mt-2">
-                            <Button type="submit" size="sm">
-                                Submit Reply
-                            </Button>
-                            <Button 
-                                type="button" 
-                                size="sm" 
-                                variant="secondary"
-                                onClick={() => setShowReplyForm(false)}
-                            >
-                                Cancel
-                            </Button>
-                        </div>
-                    </Form>
-                )}
-
-                {/* Render nested replies */}
-                {comment.replies && comment.replies.map(reply => (
-                    <Comment
-                        key={reply._id}
-                        comment={reply}
-                        blogId={blogId}
-                        user={user}
-                        level={level + 1}
-                        onReply={onReply}
-                        userDetails={userDetails}
-                        userDetailsLoading={userDetailsLoading}
-                        handleDelete={handleDelete}
-                        handleEdit={handleEdit}
-                        handleUpdate={handleUpdate}
-                        editingId={editingId}
-                        updateLoading={updateLoading}
-                        updateError={updateError}
-                        editText={editText}
-                        setEditText={setEditText}
-                    />
-                ))}
-            </Card.Body>
-        </Card>
-    );
-};
+import Comment from './Comment';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 const CommentSection = ({ blogId }) => {
     const dispatch = useDispatch();
@@ -256,10 +24,12 @@ const CommentSection = ({ blogId }) => {
     const { loading: createLoading, error: createError } = useSelector(state => state.commentCreate);
     const { loading: updateLoading, error: updateError } = useSelector(state => state.commentUpdate);
 
+    // Fetch comments on mount or when blogId changes
     useEffect(() => {
         dispatch(listComments(blogId));
     }, [dispatch, blogId]);
 
+    // Fetch user details for comment authors
     useEffect(() => {
         if (comments?.length > 0) {
             const authorIds = new Set();
@@ -276,6 +46,7 @@ const CommentSection = ({ blogId }) => {
         }
     }, [dispatch, comments, userDetails]);
 
+    // Handle comment submission
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!commentText.trim()) {
@@ -285,35 +56,47 @@ const CommentSection = ({ blogId }) => {
         dispatch(createComment(blogId, {
             content: commentText,
             author: user.uid
-        }));
-        setCommentText('');
-        setError('');
+        })).then(() => {
+            setCommentText('');
+            setError('');
+            dispatch(listComments(blogId));
+        });
     };
 
+    // Handle comment edit
     const handleEdit = (comment) => {
         setEditingId(comment?._id);
         setEditText(comment?.content || '');
     };
 
+    // Handle comment update
     const handleUpdate = (commentId) => {
         if (!editText.trim()) {
             setError('Comment cannot be empty');
             return;
         }
-        dispatch(updateComment(blogId, commentId, { content: editText }));
-        setEditingId(null);
-        setEditText('');
-        setError('');
+        dispatch(updateComment(blogId, commentId, { content: editText })).then(() => {
+            setEditingId(null);
+            setEditText('');
+            setError('');
+            dispatch(listComments(blogId));
+        });
     };
 
+    // Handle comment deletion
     const handleDelete = (commentId) => {
         if (window.confirm('Are you sure you want to delete this comment?')) {
-            dispatch(deleteComment(blogId, commentId));
+            dispatch(deleteComment(blogId, commentId)).then(() => {
+                dispatch(listComments(blogId));
+            });
         }
     };
 
+    // Handle reply to a comment
     const handleReply = (replyData) => {
-        dispatch(createComment(blogId, replyData));
+        dispatch(createComment(blogId, replyData)).then(() => {
+            dispatch(listComments(blogId));
+        });
     };
 
     // Organize comments into a tree structure
@@ -339,16 +122,17 @@ const CommentSection = ({ blogId }) => {
         return rootComments;
     };
 
-    const rootComments = organizeComments(comments);
+    const sortedComments = comments?.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const rootComments = organizeComments(sortedComments);
 
     return (
         <div className="comment-section">
             {user ? (
-                <Card className="mb-4">
+                <Card className="mb-4 shadow-sm">
                     <Card.Body>
-                        <h5 className="mb-3">Leave a Comment</h5>
-                        {error && <Alert variant="danger">{error}</Alert>}
-                        {createError && <Alert variant="danger">{createError}</Alert>}
+                        <h5 className="mb-3">💬 Leave a Comment</h5>
+                        {error && <Alert variant="danger" dismissible onClose={() => setError('')}>{error}</Alert>}
+                        {createError && <Alert variant="danger" dismissible onClose={() => setError('')}>{createError}</Alert>}
                         <Form onSubmit={handleSubmit}>
                             <Form.Group className="mb-3">
                                 <Form.Control
@@ -364,42 +148,55 @@ const CommentSection = ({ blogId }) => {
                                 type="submit" 
                                 variant="primary"
                                 disabled={createLoading}
+                                className="d-flex align-items-center"
                             >
-                                {createLoading ? 'Posting...' : 'Post Comment'}
+                                {createLoading ? (
+                                    <>
+                                        <Spinner animation="border" size="sm" className="me-2" />
+                                        Posting...
+                                    </>
+                                ) : 'Post Comment'}
                             </Button>
                         </Form>
                     </Card.Body>
                 </Card>
             ) : (
-                <Alert variant="info">
-                    Please <a href="/login">login</a> to leave a comment.
+                <Alert variant="info" className="shadow-sm">
+                    🔒 Please <a href="/login">login</a> to leave a comment.
                 </Alert>
             )}
 
             {loading ? (
-                <div className="text-center">Loading comments...</div>
+                <div className="text-center">
+                    <Spinner animation="border" role="status">
+                        <span className="visually-hidden">Loading comments...</span>
+                    </Spinner>
+                </div>
             ) : commentError ? (
-                <Alert variant="danger">{commentError}</Alert>
+                <Alert variant="danger" dismissible onClose={() => setError('')}>{commentError}</Alert>
             ) : (
-                rootComments.map(comment => (
-                    <Comment
-                        key={comment._id}
-                        comment={comment}
-                        blogId={blogId}
-                        user={user}
-                        onReply={handleReply}
-                        userDetails={userDetails}
-                        userDetailsLoading={userDetailsLoading}
-                        handleDelete={handleDelete}
-                        handleEdit={handleEdit}
-                        handleUpdate={handleUpdate}
-                        editingId={editingId}
-                        updateLoading={updateLoading}
-                        updateError={updateError}
-                        editText={editText}
-                        setEditText={setEditText}
-                    />
-                ))
+                <TransitionGroup>
+                    {rootComments.map(comment => (
+                        <CSSTransition key={comment._id} timeout={300} classNames="fade">
+                            <Comment
+                                comment={comment}
+                                blogId={blogId}
+                                user={user}
+                                onReply={handleReply}
+                                userDetails={userDetails}
+                                userDetailsLoading={userDetailsLoading}
+                                handleDelete={handleDelete}
+                                handleEdit={handleEdit}
+                                handleUpdate={handleUpdate}
+                                editingId={editingId}
+                                updateLoading={updateLoading}
+                                updateError={updateError}
+                                editText={editText}
+                                setEditText={setEditText}
+                            />
+                        </CSSTransition>
+                    ))}
+                </TransitionGroup>
             )}
         </div>
     );

@@ -20,7 +20,7 @@ import {
     PORTFOLIO_SEARCH_FAIL,
  } from '../constants/portfolio'
 
- const url = 'https://topper.onrender.com/api'
+ const url = "https://topper.onrender.com/api";
  export const listPortfolios = () => async (dispatch) => {
     try {
         dispatch({ type: PORTFOLIO_LIST_REQUEST })

@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { Shield, Mail, Calendar, User, LogOut, } from 'lucide-react';
+import { Shield, Mail, Calendar, User, LogOut, House } from 'lucide-react';
 import { Link } from 'react-router-dom'
 import { checkIsAdmin } from '../utils/auth';
 
@@ -64,13 +64,19 @@ const Profile = ({ onLogout }) => {
 
       <div className="d-grid gap-2">
         {isAdmin && (
-          <Link 
-            to="/admin" 
+          <><Link
+            to="/"
             className="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2"
           >
-            <Shield size={18} />
-            Go to Admin Dashboard
-          </Link>
+            <House size={18} />
+            Go to Home
+          </Link><Link
+            to="/admin"
+            className="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2"
+          >
+              <Shield size={18} />
+              Go to Admin Dashboard
+            </Link></>
         )}
         <button
           onClick={onLogout}

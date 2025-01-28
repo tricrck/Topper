@@ -16,7 +16,6 @@ import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPass
 import { auth, googleProvider } from "../firebase";
 
 const API_URL = "https://topper.onrender.com/api"
-
 // Google Signup
 export const googleSignup = () => async (dispatch) => {
   try {

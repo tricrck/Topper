@@ -17,13 +17,12 @@ import {
     TESTIMONIAL_DELETE_FAIL,
  } from '../constants/testimonials'
 
- const url = 'https://topper.onrender.com/api'
+ const url = "https://topper.onrender.com/api"
  export const listTestimonials = () => async (dispatch) => {
     try {
         dispatch({ type: TESTIMONIAL_LIST_REQUEST })
 
         const { data } = await axios.get(`${url}/testimonials`)
-
 
         dispatch({
             type: TESTIMONIAL_LIST_SUCCESS,

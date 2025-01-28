@@ -36,7 +36,6 @@ import {
  } from '../constants/blog'
 
  const url = "https://topper.onrender.com/api";
-
  export const listBlogs = () => async (dispatch) => {
     try {
         dispatch({ type: BLOG_LIST_REQUEST })
@@ -143,14 +142,15 @@ export const deleteBlog = (id) => async (dispatch) => {
 // Create Comment
 // Modified createComment action to handle replies
 export const createComment = (blogId, commentData) => async (dispatch) => {
+    console.log(commentData)
     try {
         dispatch({ type: COMMENT_CREATE_REQUEST });
 
         const { data } = await axios.post(`${url}/blogs/${blogId}/comments`, {
             ...commentData,
-            parentComment: commentData.parentComment || null
+            parentComment: commentData.parentComment || null // Adding support for nested replies
         });
-
+        console.log(data)
         dispatch({
             type: COMMENT_CREATE_SUCCESS,
             payload: data,
