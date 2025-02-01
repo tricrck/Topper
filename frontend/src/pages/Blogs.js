@@ -64,6 +64,8 @@ const Blogs = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error, blogs } = useSelector(state => state.blogList);
+  // Sort blogs from latest to oldest
+  const sortedBlogs = blogs ? [...blogs].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) : [];
 
   useEffect(() => {
     dispatch(listBlogs());
@@ -93,9 +95,9 @@ const Blogs = () => {
           <Alert.Heading>Connection Error</Alert.Heading>
           <p>Unable to fetch articles: {error}</p>
         </Alert>
-      ) : blogs?.length > 0 ? (
+      ) : sortedBlogs?.length > 0 ? (
         <Row>
-          {blogs.map(blog => (
+          {sortedBlogs.map(blog => (
             <BlogCard key={blog._id} blog={blog} navigate={navigate} />
           ))}
         </Row>

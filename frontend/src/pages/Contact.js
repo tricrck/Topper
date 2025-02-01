@@ -141,7 +141,6 @@ const Contact = () => {
         <Col sm={1} md={1} lg={4}>
           <Card className="shadow-lg border-0 h-100">
             <Card.Body className="p-4 p-xl-5 d-flex flex-column justify-content-center">
-              <h5 className="mb-4 text-center">Or connect directly via</h5>
               <div className="d-flex flex-column gap-3 align-items-start">
                 <SocialLink
                   href="https://facebook.com/tricroc/"

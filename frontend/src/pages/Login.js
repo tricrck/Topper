@@ -1,223 +1,212 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { googleLogin, emailLogin } from "../actions/user_actions";
+import React, { useState, useEffect } from 'react';
 import { 
-  Container, 
-  Row, 
-  Col, 
   Form, 
   Button, 
-  Card, 
   Alert, 
-  InputGroup 
+  Spinner,
+  InputGroup,
+  FormCheck,
+  Card, 
 } from 'react-bootstrap';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { FaGoogle } from 'react-icons/fa';
+import { 
+  Eye, 
+  EyeOff, 
+  Mail, 
+  Lock, 
+  LogIn, 
+  AlertCircle 
+} from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { emailLogin, googleLogin } from '../actions/user_actions';
 
-const Login = ({
-  containerClassName = "min-vh-100", // Default full height
-  cardClassName = "shadow-lg",       // Default shadow
-  titleSize = "h2",                  // Default size
-  titleFont = "fw-bold",            // Default font weight
-  cardWidth = { xs: 12, sm: 10, md: 8, lg: 6, xl: 4 }, // Default responsive widths
-  cardPadding = "p-5",              // Default padding
-  isModal = false
-}) => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { user, error } = useSelector((state) => state.auth);
-  
+const Login = ({ isModal, onSuccess, switchToSignup, cardPadding }) => {
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
     rememberMe: false
   });
+  const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [validationErrors, setValidationErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const dispatch = useDispatch();
+  const { error: authError, user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (user) onSuccess();
+  }, [user, onSuccess]);
 
   const validateForm = () => {
-    const errors = {};
-    if (!formData.email) {
-      errors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = "Please enter a valid email address";
-    }
-    if (!formData.password) {
-      errors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      errors.password = "Password must be at least 6 characters";
-    }
-    return errors;
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-    // Clear validation error when user starts typing
-    if (validationErrors[name]) {
-      setValidationErrors(prev => ({ ...prev, [name]: '' }));
-    }
+    const newErrors = {};
+    if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Valid email is required';
+    if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
+    return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const errors = validateForm();
+    const validationErrors = validateForm();
     
-    if (Object.keys(errors).length === 0) {
-      setIsLoading(true);
+    if (Object.keys(validationErrors).length === 0) {
+      setIsSubmitting(true);
+      setErrors({});
       try {
-        await dispatch(emailLogin(formData.email, formData.password));
+        await dispatch(emailLogin({
+          email: formData.email,
+          password: formData.password,
+          rememberMe: formData.rememberMe
+        }));
       } catch (err) {
-        console.error("Login error:", err);
+        setErrors(prev => ({ ...prev, form: err.message || "Login failed" }));
       } finally {
-        setIsLoading(false);
+        setIsSubmitting(false);
       }
     } else {
-      setValidationErrors(errors);
+      setErrors(validationErrors);
     }
   };
 
   const handleGoogleLogin = async () => {
-    setIsLoading(true);
+    setIsSubmitting(true);
+    setErrors({});
     try {
       await dispatch(googleLogin());
     } catch (err) {
-      console.error("Google login error:", err);
+      setErrors(prev => ({ ...prev, form: err.message || "Google login failed" }));
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  // Effect to handle redirect after successful login
-  useEffect(() => {
-    if (user) {
-      navigate("/");
-    }
-  }, [user, navigate]);
+  const handleChange = (e) => {
+    const { name, value, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === 'rememberMe' ? checked : value
+    }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: null }));
+  };
 
   return (
-    <Container fluid className={`bg-light d-flex align-items-center justify-content-center py-5 ${containerClassName}`}>
-      <Row className="justify-content-center w-100">
-        <Col {...cardWidth}>
-          <Card className={`border-0 ${cardClassName}`}>
-            <Card.Body className={cardPadding}>
-              <div className="text-center mb-4">
-                <div className={`${titleSize} ${titleFont} mb-1`}>Welcome Back</div>
-                <p className="text-muted">Please sign in to continue</p>
-              </div>
+    <div className={cardPadding}>
+      <Card className="shadow-sm">
+        <Card.Body>
+          {!isModal && <h3 className="mb-4 text-center"><LogIn size={24} className="me-2" />Login</h3>}
 
-              {error && (
-                <Alert variant="danger" className="mb-4">
-                  {error}
-                </Alert>
+          {(errors.form || authError) && (
+            <Alert variant="danger" className="d-flex align-items-center">
+              <AlertCircle size={18} className="me-2" />
+              {errors.form || authError}
+            </Alert>
+          )}
+
+          <Button 
+            variant="outline-danger" 
+            onClick={handleGoogleLogin}
+            className="w-100 mb-3 d-flex align-items-center justify-content-center"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <Spinner animation="border" size="sm" className="me-2" />
+            ) : (
+              <FaGoogle className="me-2" />
+            )}
+            Continue with Google
+          </Button>
+
+          <div className="position-relative text-center mb-4">
+            <hr className="border-secondary" />
+            <span className="px-2 bg-white position-absolute top-50 start-50 translate-middle text-muted">
+              or Anonymously
+            </span>
+          </div>
+
+          <Form onSubmit={handleSubmit}>
+            <Form.Group className="mb-3" controlId="email">
+              <Form.Label>Email address</Form.Label>
+              <InputGroup hasValidation>
+                <InputGroup.Text>
+                  <Mail size={18} />
+                </InputGroup.Text>
+                <Form.Control
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  isInvalid={!!errors.email}
+                  placeholder="Enter email"
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.email}
+                </Form.Control.Feedback>
+              </InputGroup>
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="password">
+              <Form.Label>Password</Form.Label>
+              <InputGroup hasValidation>
+                <InputGroup.Text>
+                  <Lock size={18} />
+                </InputGroup.Text>
+                <Form.Control
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={handleChange}
+                  isInvalid={!!errors.password}
+                  placeholder="Enter password"
+                />
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </Button>
+                <Form.Control.Feedback type="invalid">
+                  {errors.password}
+                </Form.Control.Feedback>
+              </InputGroup>
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="rememberMe">
+              <FormCheck>
+                <FormCheck.Input
+                  type="checkbox"
+                  name="rememberMe"
+                  checked={formData.rememberMe}
+                  onChange={handleChange}
+                />
+                <FormCheck.Label>Remember me</FormCheck.Label>
+              </FormCheck>
+            </Form.Group>
+
+            <Button 
+              variant="primary" 
+              type="submit" 
+              className="w-100 mb-3"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <Spinner animation="border" size="sm" />
+              ) : (
+                'Login'
               )}
+            </Button>
 
-              <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-4">
-                  <Form.Label>Email address</Form.Label>
-                  <InputGroup>
-                    <InputGroup.Text className="bg-light">
-                      <Mail size={18} />
-                    </InputGroup.Text>
-                    <Form.Control
-                      type="email"
-                      name="email"
-                      placeholder="Enter your email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      isInvalid={!!validationErrors.email}
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {validationErrors.email}
-                    </Form.Control.Feedback>
-                  </InputGroup>
-                </Form.Group>
-
-                <Form.Group className="mb-4">
-                  <Form.Label>Password</Form.Label>
-                  <InputGroup>
-                    <InputGroup.Text className="bg-light">
-                      <Lock size={18} />
-                    </InputGroup.Text>
-                    <Form.Control
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      placeholder="Enter your password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      isInvalid={!!validationErrors.password}
-                    />
-                    <Button 
-                      variant="light"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="border"
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </Button>
-                    <Form.Control.Feedback type="invalid">
-                      {validationErrors.password}
-                    </Form.Control.Feedback>
-                  </InputGroup>
-                </Form.Group>
-
-                <Row className="mb-4">
-                  <Col>
-                    <Form.Check
-                      type="checkbox"
-                      name="rememberMe"
-                      label="Remember me"
-                      checked={formData.rememberMe}
-                      onChange={handleInputChange}
-                    />
-                  </Col>
-                  <Col className="text-end">
-                    <a href="/forgot-password" className="text-decoration-none">
-                      Forgot Password?
-                    </a>
-                  </Col>
-                </Row>
-
-                <div className="d-grid gap-3">
-                  <Button 
-                    variant="primary" 
-                    type="submit" 
-                    size="lg"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? 'Signing in...' : 'Sign In'}
-                  </Button>
-
-                  <Button
-                    variant="outline-danger"
-                    size="lg"
-                    onClick={handleGoogleLogin}
-                    disabled={isLoading}
-                    className="d-flex align-items-center justify-content-center gap-2"
-                  >
-                    <FaGoogle size={20} />
-                    Sign in with Google
-                  </Button>
-                </div>
-              </Form>
-
-              <div className="text-center mt-4">
-                <p className="mb-0">
-                  Don't have an account?{' '}
-                  <a href="/signup" className="text-decoration-none">
-                    Create one
-                  </a>
-                </p>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+            <div className="text-center">
+              <Button 
+                variant="link" 
+                onClick={switchToSignup}
+                className="text-decoration-none"
+              >
+                Don't have an account? Sign Up
+              </Button>
+            </div>
+          </Form>
+        </Card.Body>
+      </Card>
+    </div>
   );
 };
 

@@ -1,196 +1,220 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Container, Row, Col, Form, Button, Card, Alert, InputGroup } from 'react-bootstrap';
-import { FaGoogle, FaEye, FaEyeSlash, FaEnvelope, FaLock } from 'react-icons/fa';
+import { 
+  Form, 
+  Button, 
+  Alert, 
+  Spinner,
+  InputGroup,
+  Card,
+} from 'react-bootstrap';
+import { FaGoogle } from 'react-icons/fa';
+import { 
+  Eye, 
+  EyeOff, 
+  Mail, 
+  Lock, 
+  UserPlus,
+  AlertCircle 
+} from 'lucide-react';
 import { googleSignup, emailSignup } from '../actions/user_actions';
-import { useNavigate } from 'react-router';
 
-const Signup = () => {
-  const navigate = useNavigate();
+const Signup = ({ isModal, onSuccess, switchToLogin, cardPadding }) => {
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    showPassword: false,
+    confirmPassword: ''
   });
-  const [validated, setValidated] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [isEmailSubmitting, setIsEmailSubmitting] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
+
   const dispatch = useDispatch();
-  const { user, error } = useSelector((state) => state.auth);
-  const [loading, setLoading] = useState(false);
+  const { error, user } = useSelector((state) => state.auth);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
+  useEffect(() => {
+    if (user) onSuccess();
+  }, [user, onSuccess]);
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Valid email is required';
+    if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
+    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords must match';
+    return newErrors;
   };
 
-  const togglePasswordVisibility = () => {
-    setFormData(prevState => ({
-      ...prevState,
-      showPassword: !prevState.showPassword
-    }));
-  };
-
-  const handleEmailSignup = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const form = e.currentTarget;
+    const validationErrors = validateForm();
     
-    if (form.checkValidity() === false) {
-      e.stopPropagation();
-      setValidated(true);
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setValidated(true);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await dispatch(emailSignup(formData.email, formData.password));
-    } finally {
-      setLoading(false);
-      if (!error){
-        navigate("/")
+    if (Object.keys(validationErrors).length === 0) {
+      setIsEmailSubmitting(true);
+      setErrors({});
+      try {
+        await dispatch(emailSignup(
+          formData.email,
+          formData.password
+        ));
+      } catch (err) {
+        setErrors(prev => ({ ...prev, form: err.message || "Login failed" }));
+      } finally {
+        setIsEmailSubmitting(false);
       }
+    } else {
+      setErrors(validationErrors);
     }
   };
 
   const handleGoogleSignup = async () => {
-    setLoading(true);
+    setIsGoogleSubmitting(true);
+    setErrors({});
     try {
       await dispatch(googleSignup());
+    } catch (err) {
+      setErrors(prev => ({ ...prev, form: err.message || "An error occurred during Google signup" }));
     } finally {
-      setLoading(false);
-      if (!error){
-        navigate("/")
-      }
+      setIsGoogleSubmitting(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (errors[e.target.name]) {
+      setErrors({ ...errors, [e.target.name]: null });
     }
   };
 
   return (
-    <Container fluid className="bg-light min-vh-100 d-flex align-items-center py-5">
-      <Row className="justify-content-center w-100">
-        <Col xs={12} sm={10} md={8} lg={6} xl={4}>
-          <Card className="shadow-lg">
-            <Card.Body className="p-5">
-              <h2 className="text-center mb-4">Create Account</h2>
-              
-              {error && (
-                <Alert variant="danger" className="mb-4">
-                  {error}
-                </Alert>
+    <div className={cardPadding}>
+      <Card className="shadow-sm">
+        <Card.Body>
+          {!isModal && <h3 className="mb-4 text-center"><UserPlus size={24} className="me-2" />Sign Up</h3>}
+          
+          {(errors.form || error) && (
+            <Alert variant="danger" className="d-flex align-items-center">
+              <AlertCircle size={18} className="me-2" />
+              {errors.form || error}
+            </Alert>
+          )}
+
+          <Button 
+            variant="outline-danger" 
+            onClick={handleGoogleSignup}
+            className="w-100 mb-3 d-flex align-items-center justify-content-center"
+            disabled={isGoogleSubmitting}
+          >
+            {isGoogleSubmitting ? (
+              <Spinner animation="border" size="sm" className="me-2" />
+            ) : (
+              <FaGoogle className="me-2" />
+            )}
+            Continue with Google
+          </Button>
+
+          <div className="position-relative text-center mb-4">
+            <hr className="border-secondary" />
+            <span className="px-2 bg-white position-absolute top-50 start-50 translate-middle text-muted">
+              or Anonymously
+            </span>
+          </div>
+
+          <Form onSubmit={handleSubmit}>
+
+            <Form.Group className="mb-3" controlId="email">
+              <Form.Label>Email address</Form.Label>
+              <InputGroup hasValidation>
+                <InputGroup.Text>
+                  <Mail size={18} />
+                </InputGroup.Text>
+                <Form.Control
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  isInvalid={!!errors.email}
+                  placeholder="Enter email"
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.email}
+                </Form.Control.Feedback>
+              </InputGroup>
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="password">
+              <Form.Label>Password</Form.Label>
+              <InputGroup hasValidation>
+                <InputGroup.Text>
+                  <Lock size={18} />
+                </InputGroup.Text>
+                <Form.Control
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={handleChange}
+                  isInvalid={!!errors.password}
+                  placeholder="Enter password"
+                />
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </Button>
+                <Form.Control.Feedback type="invalid">
+                  {errors.password}
+                </Form.Control.Feedback>
+              </InputGroup>
+            </Form.Group>
+
+            <Form.Group className="mb-4" controlId="confirmPassword">
+              <Form.Label>Confirm Password</Form.Label>
+              <InputGroup hasValidation>
+                <InputGroup.Text>
+                  <Lock size={18} />
+                </InputGroup.Text>
+                <Form.Control
+                  name="confirmPassword"
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  isInvalid={!!errors.confirmPassword}
+                  placeholder="Confirm password"
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.confirmPassword}
+                </Form.Control.Feedback>
+              </InputGroup>
+            </Form.Group>
+
+            <Button 
+              variant="primary" 
+              type="submit" 
+              className="w-100 mb-3"
+              disabled={isEmailSubmitting}
+            >
+              {isEmailSubmitting ? (
+                <Spinner animation="border" size="sm" />
+              ) : (
+                'Create Account'
               )}
+            </Button>
 
-              {user && (
-                <Alert variant="success" className="mb-4">
-                  Welcome, {user.displayName || user.email}!
-                </Alert>
-              )}
-
-              <Form noValidate validated={validated} onSubmit={handleEmailSignup}>
-                <Form.Group className="mb-4" controlId="formEmail">
-                  <Form.Label>Email address</Form.Label>
-                  <InputGroup>
-                    <InputGroup.Text>
-                      <FaEnvelope />
-                    </InputGroup.Text>
-                    <Form.Control
-                      required
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="Enter your email"
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      Please provide a valid email.
-                    </Form.Control.Feedback>
-                  </InputGroup>
-                </Form.Group>
-
-                <Form.Group className="mb-4" controlId="formPassword">
-                  <Form.Label>Password</Form.Label>
-                  <InputGroup>
-                    <InputGroup.Text>
-                      <FaLock />
-                    </InputGroup.Text>
-                    <Form.Control
-                      required
-                      type={formData.showPassword ? "text" : "password"}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="Enter your password"
-                      pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$"
-                    />
-                    <Button
-                      variant="outline-secondary"
-                      onClick={togglePasswordVisibility}
-                    >
-                      {formData.showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </Button>
-                    <Form.Control.Feedback type="invalid">
-                      Password must be at least 8 characters long and contain both letters and numbers.
-                    </Form.Control.Feedback>
-                  </InputGroup>
-                </Form.Group>
-
-                <Form.Group className="mb-4" controlId="formConfirmPassword">
-                  <Form.Label>Confirm Password</Form.Label>
-                  <InputGroup>
-                    <InputGroup.Text>
-                      <FaLock />
-                    </InputGroup.Text>
-                    <Form.Control
-                      required
-                      type={formData.showPassword ? "text" : "password"}
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      placeholder="Confirm your password"
-                      isInvalid={validated && formData.password !== formData.confirmPassword}
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      Passwords do not match.
-                    </Form.Control.Feedback>
-                  </InputGroup>
-                </Form.Group>
-
-                <div className="d-grid gap-2">
-                  <Button
-                    variant="primary"
-                    type="submit"
-                    disabled={loading}
-                    className="mb-3"
-                  >
-                    {loading ? 'Signing up...' : 'Sign Up with Email'}
-                  </Button>
-
-                  <Button
-                    variant="outline-danger"
-                    onClick={handleGoogleSignup}
-                    disabled={loading}
-                    className="d-flex align-items-center justify-content-center gap-2"
-                  >
-                    <FaGoogle /> Sign Up with Google
-                  </Button>
-                </div>
-              </Form>
-
-              <div className="text-center mt-4">
-                <p className="text-muted">
-                  Already have an account? <a href="/login">Log In</a>
-                </p>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+            <div className="text-center">
+              <Button 
+                variant="link" 
+                onClick={switchToLogin}
+                className="text-decoration-none"
+              >
+                Already have an account? Log In
+              </Button>
+            </div>
+          </Form>
+        </Card.Body>
+      </Card>
+    </div>
   );
 };
 

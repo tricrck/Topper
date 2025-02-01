@@ -162,7 +162,7 @@ const CommentSection = ({ blogId }) => {
                 </Card>
             ) : (
                 <Alert variant="info" className="shadow-sm">
-                    🔒 Please <a href="/login">login</a> to leave a comment.
+                    🔒 Login from the header to leave a comment.
                 </Alert>
             )}
 

@@ -98,7 +98,7 @@ export const usersReducer = (state = usersInitialState, action) => {
       case 'FETCH_USER_DETAILS_SUCCESS':
         return {
             ...state,
-            loading: false,
+            userDetailsLoading: false,
             userDetails: {
                 ...state.userDetails,
                 [action.payload.uid]: action.payload, // Add/Update user details

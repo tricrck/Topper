@@ -12,7 +12,10 @@ import {
   FETCH_USER_DETAILS_SUCCESS,
   FETCH_USER_DETAILS_FAIL
 } from "../constants/user";
-import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "@firebase/auth";
+import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, getAuth,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence } from "@firebase/auth";
 import { auth, googleProvider } from "../firebase";
 
 const API_URL = "https://topper.onrender.com/api"
@@ -107,12 +110,26 @@ export const emailSignup = (email, password) => async (dispatch) => {
 };
 
 // email Login
-export const emailLogin = (email, password) => async (dispatch) => {
+export const emailLogin = ({ email, password, rememberMe=false }) => async (dispatch) => {
+  const auth = getAuth();
+  
   try {
-    // Attempt to log the user in
-    const result = await signInWithEmailAndPassword(auth, email, password);
-    const token = await result.user.getIdToken();
+    // Validate inputs
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      throw new Error('Email and password must be strings');
+    }
 
+    // Set persistence
+    await setPersistence(
+      auth,
+      rememberMe ? browserLocalPersistence : browserSessionPersistence
+    );
+
+    // Sign in with email/password
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    
+    // Get auth token
+    const token = await result.user.getIdToken();
     // Dispatch the success action
     dispatch({ type: "LOGIN_SUCCESS", payload: { user: result.user, token } });
 
@@ -122,7 +139,7 @@ export const emailLogin = (email, password) => async (dispatch) => {
       JSON.stringify({ user: result.user, token })
     );
 
-    console.log("Login successful:", result.user);
+    console.log("Login successful:");
   } catch (error) {
     // Dispatch the failure action
     dispatch({ type: "LOGIN_FAIL", payload: error.message });

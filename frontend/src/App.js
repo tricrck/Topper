@@ -17,8 +17,6 @@ import AdminPortfolioCreate from './pages/Admin/AdminPortfolioCreate'
 import AdminTestimonyList from './pages/Admin/AdminTestimonyList';
 import AdminTestimonyCreate from './pages/Admin/AdminTestimonyCreate';
 import AdminTestimonyEdit from './pages/Admin/AdminTestimonyEdit';
-import Signup from './pages/Signup';
-import Login from './pages/Login';
 import AdminHeader from './components/AdminHeader';
 import Dashboard from './components/Dashboard';
 import { useSelector } from 'react-redux';
@@ -66,9 +64,6 @@ function App() {
           <Route path="/admin/testimonial/create" element={<AdminRoute element={<AdminTestimonyCreate />} />} />
           <Route path="/admin/testimonial/edit/:id" element={<AdminRoute element={<AdminTestimonyEdit />} />} />
           <Route path="/admin" element={<AdminRoute element={<Dashboard />} />} />
-
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
         </Routes>
       </main>
       <Footer />

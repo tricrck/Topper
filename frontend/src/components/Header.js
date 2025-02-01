@@ -11,10 +11,12 @@ import {
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { logout } from '../actions/user_actions';
 import Login from '../pages/Login';
+import Signup from '../pages/Signup';
 import Profile from '../pages/Profile';
 
 const Header = () => {
   const [showModal, setShowModal] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const location = useLocation();
@@ -103,8 +105,11 @@ const Header = () => {
         </Container>
       </Navbar>
 
-      {/* Auth Modal */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+       {/* Updated Auth Modal */}
+       <Modal show={showModal} onHide={() => {
+        setShowModal(false);
+        setAuthMode('login'); // Reset to login when closing
+      }} centered>
         <Modal.Header closeButton className="border-0 pb-0">
           <Modal.Title className="h5">
             {user ? (
@@ -114,8 +119,6 @@ const Header = () => {
               </div>
             ) : (
               <div className="d-flex align-items-center gap-2">
-                <LogIn size={24} />
-                Welcome Back
               </div>
             )}
           </Modal.Title>
@@ -123,10 +126,18 @@ const Header = () => {
         <Modal.Body>
           {user ? (
             <Profile onLogout={handleLogout} />
-          ) : (
+          ) : authMode === 'login' ? (
             <Login 
-              containerClassName="p-0" 
-              titleSize="h5" 
+              isModal
+              onSuccess={() => setShowModal(false)}
+              switchToSignup={() => setAuthMode('signup')}
+              cardPadding="p-0"
+            />
+          ) : (
+            <Signup 
+              isModal
+              onSuccess={() => setShowModal(false)}
+              switchToLogin={() => setAuthMode('login')}
               cardPadding="p-0"
             />
           )}
